@@ -17,21 +17,25 @@
       --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
       --border-radius: 8px;
     }
+
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
+
     body {
       background-color: #f5f5f5;
       color: var(--text-color);
     }
+
     .admin-container {
       max-width: 1400px;
       margin: 0 auto;
       padding: 20px;
     }
+
     .admin-header {
       position: relative;
       text-align: center;
@@ -41,16 +45,43 @@
       border-radius: var(--border-radius);
       margin-bottom: 2rem;
     }
-    .logout-btn {
+
+    .header-controls {
       position: absolute;
       top: 20px;
       right: 20px;
-      background: transparent;
-      border: none;
-      color: white;
-      font-size: 1rem;
-      cursor: pointer;
+      display: flex;
+      flex-direction: row;
+      gap: 10px;
+      align-items: center;
     }
+
+    .logout-btn {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 8px 15px;
+      border: none;
+      border-radius: 20px;
+      color: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s;
+      white-space: nowrap;
+    }
+
+    .logout-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    #deleteAllBtn {
+      background: var(--warning-color);
+    }
+
+    #deleteAllBtn:hover {
+      background: #d39e00;
+    }
+
     .filters {
       display: flex;
       gap: 10px;
@@ -58,6 +89,7 @@
       flex-wrap: wrap;
       justify-content: center;
     }
+
     .filter-btn {
       padding: 10px 20px;
       border: none;
@@ -67,22 +99,44 @@
       transition: all 0.3s ease;
       font-size: 0.9rem;
     }
+
     .filter-btn.active {
       background-color: var(--primary-color);
       color: white;
     }
+
+    .filters-select {
+      display: none;
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 1rem;
+      border: 2px solid var(--primary-color);
+      border-radius: var(--border-radius);
+      background: white;
+      font-size: 1rem;
+      appearance: none;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%232c3e50'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      background-size: 24px;
+      cursor: pointer;
+    }
+
     .orders-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
       gap: 20px;
     }
+
     .order-card {
       background: white;
       border-radius: var(--border-radius);
       padding: 20px;
       box-shadow: var(--shadow);
       position: relative;
+      transition: transform 0.3s ease;
     }
+
     .order-status {
       position: absolute;
       top: 10px;
@@ -92,38 +146,46 @@
       font-size: 0.8rem;
       font-weight: bold;
     }
+
     .status-pending {
       background-color: var(--warning-color);
       color: var(--text-color);
     }
+
     .status-completed {
       background-color: var(--success-color);
       color: white;
     }
+
     .status-cancelled {
       background-color: var(--danger-color);
       color: white;
     }
+
     .order-table {
       font-size: 1.5rem;
       color: var(--primary-color);
       margin-bottom: 10px;
     }
+
     .order-time {
       font-size: 0.9rem;
       color: #666;
       margin-bottom: 15px;
     }
+
     .order-items {
       list-style: none;
       margin-bottom: 15px;
     }
+
     .order-item {
       display: flex;
       justify-content: space-between;
       padding: 8px 0;
       border-bottom: 1px solid #eee;
     }
+
     .order-notes {
       background-color: #f8f9fa;
       padding: 10px;
@@ -131,11 +193,13 @@
       margin-top: 10px;
       font-size: 0.9rem;
     }
+
     .order-actions {
       margin-top: 15px;
       display: flex;
       gap: 10px;
     }
+
     .action-btn {
       flex: 1;
       padding: 8px;
@@ -145,18 +209,22 @@
       transition: opacity 0.3s;
       font-size: 0.9rem;
     }
+
     .complete-btn {
       background-color: var(--success-color);
       color: white;
     }
+
     .cancel-btn {
       background-color: var(--danger-color);
       color: white;
     }
+
     .print-btn {
       background-color: var(--secondary-color);
       color: white;
     }
+
     .login-modal {
       position: fixed;
       top: 0;
@@ -170,6 +238,37 @@
       z-index: 9999;
       padding: 20px;
     }
+
+    .confirm-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      padding: 20px;
+    }
+
+    .confirm-content {
+      background: white;
+      padding: 30px;
+      border-radius: var(--border-radius);
+      text-align: center;
+      max-width: 400px;
+      width: 100%;
+    }
+
+    .confirm-buttons {
+      margin-top: 20px;
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+
     .login-content {
       background: white;
       padding: 30px;
@@ -177,83 +276,121 @@
       text-align: center;
       max-width: 300px;
       width: 100%;
+      box-shadow: 0 0 20px rgba(0,0,0,0.2);
     }
+
     .login-content h2 {
       margin-bottom: 20px;
       color: var(--primary-color);
       font-size: 1.5rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
     }
+
     .login-content input {
       width: 100%;
-      padding: 10px;
-      font-size: 1rem;
+      padding: 12px 15px;
       margin-bottom: 20px;
-      border: 1px solid #ccc;
-      border-radius: var(--border-radius);
-    }
-    .login-content button {
-      padding: 10px 20px;
+      border: 2px solid #ddd;
+      border-radius: 6px;
       font-size: 1rem;
-      border: none;
-      border-radius: var(--border-radius);
-      background-color: var(--primary-color);
+      transition: border-color 0.3s;
+    }
+
+    .login-content input:focus {
+      border-color: var(--primary-color);
+      outline: none;
+    }
+
+    .login-content button {
+      padding: 12px 30px;
+      font-size: 1rem;
+      background: var(--primary-color);
       color: white;
+      border: none;
+      border-radius: 6px;
       cursor: pointer;
-      transition: background 0.3s;
-      width: 100%;
+      transition: transform 0.2s, background 0.3s;
     }
+
     .login-content button:hover {
-      background-color: var(--secondary-color);
+      background: var(--secondary-color);
+      transform: translateY(-2px);
     }
+
     .login-error {
-      color: red;
-      margin-top: 10px;
+      color: var(--danger-color);
+      margin-top: 15px;
+      font-weight: bold;
       display: none;
-      font-size: 0.9rem;
     }
+
     @media (max-width: 768px) {
+      .filters {
+        display: none;
+      }
+      
+      .filters-select {
+        display: block;
+      }
+      
+      .logout-btn {
+        padding: 6px 12px;
+        font-size: 0.9rem;
+      }
+
+      .logout-btn span {
+        display: none;
+      }
+
+      .header-controls {
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        top: 10px;
+        right: 10px;
+        gap: 6px;
+      }
+
       .admin-container {
         padding: 10px;
       }
+
       .admin-header {
         padding: 1.5rem;
       }
-      .logout-btn {
-        top: 10px;
-        right: 10px;
-        font-size: 0.9rem;
-      }
+
       .order-table {
         font-size: 1.3rem;
       }
+
       .order-time, .order-item, .order-notes, .action-btn {
         font-size: 0.8rem;
       }
-      .login-content h2 {
-        font-size: 1.3rem;
-      }
-      .login-content input,
-      .login-content button {
-        font-size: 0.9rem;
+    }
+
+    @media (min-width: 769px) {
+      .filters-select {
+        display: none;
       }
     }
+
     @media (max-width: 480px) {
       .filters {
         flex-direction: column;
         align-items: center;
       }
+
       .filter-btn {
         width: 100%;
         margin-bottom: 5px;
       }
+
       .orders-grid {
         grid-template-columns: 1fr;
       }
+
       .admin-header {
         padding: 1rem;
-      }
-      .logout-btn {
-        font-size: 0.8rem;
       }
     }
   </style>
@@ -261,10 +398,21 @@
 <body>
   <div id="loginModal" class="login-modal">
     <div class="login-content">
-      <h2>Ingrese PIN de administrador</h2>
-      <input type="password" id="adminPinInput" placeholder="Ingrese PIN">
-      <button id="loginBtn">Entrar</button>
-      <p id="loginError" class="login-error">PIN incorrecto, intente de nuevo.</p>
+      <h2>Acceso Administrador</h2>
+      <input type="password" id="adminPinInput" placeholder="🔒 Ingrese su PIN">
+      <button id="loginBtn">Ingresar</button>
+      <p id="loginError" class="login-error">PIN incorrecto</p>
+    </div>
+  </div>
+
+  <div id="confirmModal" class="confirm-modal">
+    <div class="confirm-content">
+      <h2>¿Está seguro de borrar todos los pedidos?</h2>
+      <p>Esta acción es irreversible y eliminará todos los pedidos de Firebase.</p>
+      <div class="confirm-buttons">
+        <button id="confirmDelete" class="action-btn danger">Borrar Todo</button>
+        <button id="cancelDelete" class="action-btn secondary">Cancelar</button>
+      </div>
     </div>
   </div>
   
@@ -272,9 +420,26 @@
     <header class="admin-header">
       <h1>Panel de Administración</h1>
       <p>Pedidos en tiempo real</p>
-      <button id="logoutBtn" class="logout-btn"><i class="fa fa-sign-out-alt"></i> Cerrar sesión</button>
+      <div class="header-controls">
+        <button id="deleteAllBtn" class="logout-btn">
+          <i class="fas fa-trash-alt"></i> <span>Borrar Todo</span>
+        </button>
+        <button id="soundToggle" class="logout-btn">
+          <i class="fas fa-bell"></i> <span>Sonido: ON</span>
+        </button>
+        <button id="logoutBtn" class="logout-btn">
+          <i class="fa fa-sign-out-alt"></i> <span>Cerrar sesión</span>
+        </button>
+      </div>
     </header>
-    
+
+    <select class="filters-select" id="mobileFilters">
+      <option value="all">Todos los pedidos</option>
+      <option value="pending">Pendientes</option>
+      <option value="completed">Completados</option>
+      <option value="cancelled">Cancelados</option>
+    </select>
+
     <div class="filters">
       <button class="filter-btn active" data-filter="all">Todos</button>
       <button class="filter-btn" data-filter="pending">Pendientes</button>
@@ -282,58 +447,80 @@
       <button class="filter-btn" data-filter="cancelled">Cancelados</button>
     </div>
     
-    <div class="orders-grid" id="ordersGrid">
-      <!-- Se agregarán los pedidos en tiempo real -->
-    </div>
+    <div class="orders-grid" id="ordersGrid"></div>
   </div>
 
-  <audio id="orderSound" src="https://www.soundjay.com/button/beep-07.wav" preload="auto"></audio>
+  <audio id="orderSound" src="https://github.com/Onixmanager/Prueba2-CamareroDigital/raw/refs/heads/main/notificacion1.mp3" preload="auto"></audio>
 
   <script type="module">
-    const adminPIN = "Admin041";
+    const adminPIN = "adminadmin";
     const sessionKey = "adminSession";
+    const elements = {
+      loginModal: document.getElementById("loginModal"),
+      adminPinInput: document.getElementById("adminPinInput"),
+      loginBtn: document.getElementById("loginBtn"),
+      loginError: document.getElementById("loginError"),
+      logoutBtn: document.getElementById("logoutBtn"),
+      deleteAllBtn: document.getElementById("deleteAllBtn"),
+      confirmModal: document.getElementById("confirmModal"),
+      confirmDelete: document.getElementById("confirmDelete"),
+      cancelDelete: document.getElementById("cancelDelete"),
+      soundToggle: document.getElementById("soundToggle"),
+      mobileFilters: document.getElementById("mobileFilters"),
+      filterButtons: document.querySelectorAll('.filter-btn'),
+      ordersGrid: document.getElementById('ordersGrid')
+    };
 
-    const loginModal = document.getElementById("loginModal");
-    const adminPinInput = document.getElementById("adminPinInput");
-    const loginBtn = document.getElementById("loginBtn");
-    const loginError = document.getElementById("loginError");
-    const logoutBtn = document.getElementById("logoutBtn");
+    // Control de sonido
+    let soundEnabled = localStorage.getItem('soundEnabled') !== 'false';
+    let lastSoundTime = 0;
 
+    function updateSoundIcon() {
+      const icon = elements.soundToggle.querySelector('i');
+      const text = elements.soundToggle.querySelector('span');
+      icon.className = soundEnabled ? 'fas fa-bell' : 'fas fa-bell-slash';
+      text.textContent = soundEnabled ? 'Sonido: ON' : 'Sonido: OFF';
+    }
+
+    elements.soundToggle.addEventListener('click', () => {
+      soundEnabled = !soundEnabled;
+      localStorage.setItem('soundEnabled', soundEnabled);
+      updateSoundIcon();
+    });
+    updateSoundIcon();
+
+    // Autenticación
     function showLoginModal() {
-      loginModal.style.display = "flex";
+      elements.loginModal.style.display = "flex";
     }
 
     function hideLoginModal() {
-      loginModal.style.display = "none";
+      elements.loginModal.style.display = "none";
     }
 
     function checkAuth() {
-      if (localStorage.getItem(sessionKey) === "true") {
-        hideLoginModal();
-      } else {
-        showLoginModal();
-      }
+      localStorage.getItem(sessionKey) === "true" ? hideLoginModal() : showLoginModal();
     }
 
-    loginBtn.addEventListener("click", () => {
-      const pinIngresado = adminPinInput.value;
-      if (pinIngresado === adminPIN) {
+    elements.loginBtn.addEventListener("click", () => {
+      if (elements.adminPinInput.value === adminPIN) {
         localStorage.setItem(sessionKey, "true");
         hideLoginModal();
       } else {
-        loginError.style.display = "block";
+        elements.loginError.style.display = "block";
       }
     });
 
-    logoutBtn.addEventListener("click", () => {
+    elements.logoutBtn.addEventListener("click", () => {
       localStorage.removeItem(sessionKey);
       location.reload();
     });
 
     checkAuth();
 
+    // Firebase
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-    import { getDatabase, ref, onChildAdded, onChildChanged, onChildRemoved, update } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+    import { getDatabase, ref, onChildAdded, onChildChanged, onChildRemoved, update, get } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCzZBL-GfbxbWtPzMHOkSgnfF0UXD7wt4Y",
@@ -349,12 +536,38 @@
     const appFirebase = initializeApp(firebaseConfig);
     const db = getDatabase(appFirebase);
     const pedidosRef = ref(db, 'pedidos');
-
-    const ordersGrid = document.getElementById('ordersGrid');
-    const filterButtons = document.querySelectorAll('.filter-btn');
     const orderSound = document.getElementById('orderSound');
-    let lastSoundTime = 0;
 
+    // Funciones de pedidos
+    async function borrarTodosLosPedidos() {
+      try {
+        const pedidosSnapshot = await get(pedidosRef);
+        const updates = {};
+        pedidosSnapshot.forEach((childSnapshot) => {
+          updates[childSnapshot.key] = null;
+        });
+        await update(ref(db), updates);
+        elements.ordersGrid.innerHTML = '';
+      } catch (error) {
+        console.error('Error al borrar pedidos:', error);
+      }
+    }
+
+    // Manejo de modales
+    elements.deleteAllBtn.addEventListener('click', () => {
+      elements.confirmModal.style.display = 'flex';
+    });
+
+    elements.cancelDelete.addEventListener('click', () => {
+      elements.confirmModal.style.display = 'none';
+    });
+
+    elements.confirmDelete.addEventListener('click', async () => {
+      elements.confirmModal.style.display = 'none';
+      await borrarTodosLosPedidos();
+    });
+
+    // Funciones de tiempo y creación de tarjetas
     function timeAgo(fecha) {
       const diffMs = Date.now() - new Date(fecha).getTime();
       const diffMin = Math.floor(diffMs / 60000);
@@ -381,7 +594,6 @@
           const cantidad = item.qty || 1;
           const precioItem = (item.price * cantidad).toFixed(2);
           
-          // Detalles del menú
           let detallesMenu = '';
           if(item.menuSelections) {
             detallesMenu = Object.entries(item.menuSelections)
@@ -389,7 +601,6 @@
               .join('');
           }
           
-          // Notas del ítem
           let notasItem = '';
           if(item.note) {
             notasItem = `<div style="font-size:0.8em;color:#666;margin-top:4px;">Nota: ${item.note}</div>`;
@@ -440,7 +651,20 @@
     function actualizarEstadoPedido(key, nuevoEstado) {
       const pedidoRef = ref(db, 'pedidos/' + key);
       update(pedidoRef, { status: nuevoEstado })
-        .then(() => console.log(`Pedido ${key} actualizado a ${nuevoEstado}`))
+        .then(() => {
+          const currentFilter = document.querySelector('.filter-btn.active').dataset.filter;
+          const card = document.querySelector(`.order-card[data-key="${key}"]`);
+          
+          if (currentFilter !== 'all' && currentFilter !== nuevoEstado) {
+            card.style.transform = 'scale(0.9)';
+            setTimeout(() => card.remove(), 300);
+          } else {
+            card.setAttribute('data-status', nuevoEstado);
+            const statusElement = card.querySelector('.order-status');
+            statusElement.className = `order-status status-${nuevoEstado}`;
+            statusElement.textContent = nuevoEstado === 'completed' ? 'Completado' : 'Cancelado';
+          }
+        })
         .catch(error => console.error('Error al actualizar el estado:', error));
     }
 
@@ -448,9 +672,9 @@
       const existente = document.querySelector(`.order-card[data-key="${key}"]`);
       const card = crearOrderCard(key, data);
       if (existente) {
-        ordersGrid.replaceChild(card, existente);
+        elements.ordersGrid.replaceChild(card, existente);
       } else {
-        ordersGrid.appendChild(card);
+        elements.ordersGrid.appendChild(card);
       }
     }
 
@@ -494,12 +718,12 @@
       printWindow.close();
     }
 
+    // Listeners de Firebase
     onChildAdded(pedidosRef, (snapshot) => {
       const key = snapshot.key;
       const data = snapshot.val();
       
-      // Reproducir sonido solo para pedidos nuevos pendientes
-      if((!data.status || data.status === "pending") && Date.now() - lastSoundTime > 3000) {
+      if((!data.status || data.status === "pending") && soundEnabled && Date.now() - lastSoundTime > 3000) {
         orderSound.play().catch(error => console.error("Error de sonido:", error));
         lastSoundTime = Date.now();
       }
@@ -516,12 +740,18 @@
       if (existente) existente.remove();
     });
 
-    filterButtons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        filterButtons.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        filtrarPedidos(btn.dataset.filter);
+    // Filtrado
+    function updateFilters(newFilter) {
+      elements.filterButtons.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.filter === newFilter);
       });
+      elements.mobileFilters.value = newFilter;
+      filtrarPedidos(newFilter);
+    }
+
+    elements.mobileFilters.addEventListener('change', (e) => updateFilters(e.target.value));
+    elements.filterButtons.forEach(btn => {
+      btn.addEventListener('click', () => updateFilters(btn.dataset.filter));
     });
 
     function filtrarPedidos(filtro) {
