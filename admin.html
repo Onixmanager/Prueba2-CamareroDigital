@@ -157,7 +157,6 @@
       background-color: var(--secondary-color);
       color: white;
     }
-    /* Estilos para el modal de login */
     .login-modal {
       position: fixed;
       top: 0;
@@ -212,7 +211,6 @@
       display: none;
       font-size: 0.9rem;
     }
-    /* Media Queries */
     @media (max-width: 768px) {
       .admin-container {
         padding: 10px;
@@ -261,7 +259,6 @@
   </style>
 </head>
 <body>
-  <!-- Modal de autenticación -->
   <div id="loginModal" class="login-modal">
     <div class="login-content">
       <h2>Ingrese PIN de administrador</h2>
@@ -290,12 +287,10 @@
     </div>
   </div>
 
-  <!-- Elemento de audio para el sonido del pedido -->
   <audio id="orderSound" src="https://www.soundjay.com/button/beep-07.wav" preload="auto"></audio>
 
   <script type="module">
-    // Nota: La autenticación con PIN aquí es muy básica y se recomienda usar un método más seguro (por ejemplo, Firebase Authentication) en producción.
-    const adminPIN = "Admin041"; // PIN hardcodeado: reemplazar en producción
+    const adminPIN = "Admin041";
     const sessionKey = "adminSession";
 
     const loginModal = document.getElementById("loginModal");
@@ -335,37 +330,31 @@
       location.reload();
     });
 
-    // Verifica autenticación al cargar la página
     checkAuth();
 
-    // Importa funciones de Firebase
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
     import { getDatabase, ref, onChildAdded, onChildChanged, onChildRemoved, update } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
-    // Configuración de Firebase – REEMPLAZA con tus credenciales seguras en producción
-    apiKey: "AIzaSyCzZBL-GfbxbWtPzMHOkSgnfF0UXD7wt4Y",
-  authDomain: "pruebacamarero-b7f54.firebaseapp.com",
-  databaseURL: "https://pruebacamarero-b7f54-default-rtdb.europe-west1.firebasedatabase.app/",
-  projectId: "pruebacamarero-b7f54",
-  storageBucket: "pruebacamarero-b7f54.firebasestorage.app",
-  messagingSenderId: "191387429666",
-  appId: "1:191387429666:web:ae8472198e543c6de5d37b",
-  measurementId: "G-KXDVQLNQW2"
-};
+    const firebaseConfig = {
+      apiKey: "AIzaSyCzZBL-GfbxbWtPzMHOkSgnfF0UXD7wt4Y",
+      authDomain: "pruebacamarero-b7f54.firebaseapp.com",
+      databaseURL: "https://pruebacamarero-b7f54-default-rtdb.europe-west1.firebasedatabase.app/",
+      projectId: "pruebacamarero-b7f54",
+      storageBucket: "pruebacamarero-b7f54.firebasestorage.app",
+      messagingSenderId: "191387429666",
+      appId: "1:191387429666:web:ae8472198e543c6de5d37b",
+      measurementId: "G-KXDVQLNQW2"
+    };
 
-    // Inicializa Firebase
     const appFirebase = initializeApp(firebaseConfig);
     const db = getDatabase(appFirebase);
-
-    // Referencia a la ruta "pedidos" en Firebase
     const pedidosRef = ref(db, 'pedidos');
 
     const ordersGrid = document.getElementById('ordersGrid');
     const filterButtons = document.querySelectorAll('.filter-btn');
-
     const orderSound = document.getElementById('orderSound');
+    let lastSoundTime = 0;
 
-    // Función para calcular el tiempo transcurrido
     function timeAgo(fecha) {
       const diffMs = Date.now() - new Date(fecha).getTime();
       const diffMin = Math.floor(diffMs / 60000);
@@ -373,7 +362,6 @@
       return `Hace ${diffMin} minuto${diffMin > 1 ? 's' : ''}`;
     }
 
-    // Crea el HTML para un pedido
     function crearOrderCard(key, data) {
       const status = data.status ? data.status : "pending";
       let statusClass = "status-pending";
@@ -392,9 +380,28 @@
           const nombre = item.name || "Producto";
           const cantidad = item.qty || 1;
           const precioItem = (item.price * cantidad).toFixed(2);
+          
+          // Detalles del menú
+          let detallesMenu = '';
+          if(item.menuSelections) {
+            detallesMenu = Object.entries(item.menuSelections)
+              .map(([seccion, opcion]) => `<div style="font-size:0.8em;color:#666;">${seccion}: ${opcion}</div>`)
+              .join('');
+          }
+          
+          // Notas del ítem
+          let notasItem = '';
+          if(item.note) {
+            notasItem = `<div style="font-size:0.8em;color:#666;margin-top:4px;">Nota: ${item.note}</div>`;
+          }
+
           itemsHTML += `
             <li class="order-item">
-              <span>${cantidad}x ${nombre}</span>
+              <div>
+                <div style="margin-bottom:4px;">${cantidad}x ${nombre}</div>
+                ${detallesMenu}
+                ${notasItem}
+              </div>
               <span>${precioItem}€</span>
             </li>
           `;
@@ -430,19 +437,13 @@
       return card;
     }
 
-    // Actualiza estado del pedido en Firebase
     function actualizarEstadoPedido(key, nuevoEstado) {
       const pedidoRef = ref(db, 'pedidos/' + key);
       update(pedidoRef, { status: nuevoEstado })
-        .then(() => {
-          console.log(`Pedido ${key} actualizado a ${nuevoEstado}`);
-        })
-        .catch(error => {
-          console.error('Error al actualizar el estado:', error);
-        });
+        .then(() => console.log(`Pedido ${key} actualizado a ${nuevoEstado}`))
+        .catch(error => console.error('Error al actualizar el estado:', error));
     }
 
-    // Agrega o actualiza un pedido en el DOM
     function agregarOActualizarPedido(key, data) {
       const existente = document.querySelector(`.order-card[data-key="${key}"]`);
       const card = crearOrderCard(key, data);
@@ -453,7 +454,6 @@
       }
     }
 
-    // Imprime el recibo del pedido
     function printReceipt(key, data) {
       const printWindow = window.open('', '', 'height=600,width=400');
       printWindow.document.write('<html><head><title>Recibo de Pedido</title>');
@@ -468,7 +468,19 @@
             const cantidad = item.qty || 1;
             const nombre = item.name || 'Producto';
             const precioTotal = (item.price * cantidad).toFixed(2);
-            printWindow.document.write('<li>' + cantidad + ' x ' + nombre + ' - ' + precioTotal + '€</li>');
+            let detalles = '';
+            if(item.menuSelections) {
+              detalles = Object.entries(item.menuSelections)
+                .map(([seccion, opcion]) => `<div>${seccion}: ${opcion}</div>`)
+                .join('');
+            }
+            printWindow.document.write(`
+              <li>
+                <div>${cantidad} x ${nombre} - ${precioTotal}€</div>
+                ${detalles}
+                ${item.note ? `<div>Nota: ${item.note}</div>` : ''}
+              </li>
+            `);
          });
       }
       printWindow.document.write('</ul>');
@@ -485,46 +497,36 @@
     onChildAdded(pedidosRef, (snapshot) => {
       const key = snapshot.key;
       const data = snapshot.val();
-      agregarOActualizarPedido(key, data);
       
-      // Reproduce sonido al recibir un nuevo pedido
-      orderSound.play().catch(error => {
-        console.error("No se pudo reproducir el sonido: ", error);
-      });
+      // Reproducir sonido solo para pedidos nuevos pendientes
+      if((!data.status || data.status === "pending") && Date.now() - lastSoundTime > 3000) {
+        orderSound.play().catch(error => console.error("Error de sonido:", error));
+        lastSoundTime = Date.now();
+      }
+      
+      agregarOActualizarPedido(key, data);
     });
 
     onChildChanged(pedidosRef, (snapshot) => {
-      const key = snapshot.key;
-      const data = snapshot.val();
-      agregarOActualizarPedido(key, data);
+      agregarOActualizarPedido(snapshot.key, snapshot.val());
     });
 
     onChildRemoved(pedidosRef, (snapshot) => {
-      const key = snapshot.key;
-      const existente = document.querySelector(`.order-card[data-key="${key}"]`);
-      if (existente) {
-        ordersGrid.removeChild(existente);
-      }
+      const existente = document.querySelector(`.order-card[data-key="${snapshot.key}"]`);
+      if (existente) existente.remove();
     });
 
     filterButtons.forEach(btn => {
       btn.addEventListener('click', () => {
         filterButtons.forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-        const filtro = btn.getAttribute('data-filter');
-        filtrarPedidos(filtro);
+        filtrarPedidos(btn.dataset.filter);
       });
     });
 
     function filtrarPedidos(filtro) {
-      const cards = document.querySelectorAll('.order-card');
-      cards.forEach(card => {
-        const status = card.getAttribute('data-status');
-        if(filtro === 'all' || filtro === status) {
-          card.style.display = 'block';
-        } else {
-          card.style.display = 'none';
-        }
+      document.querySelectorAll('.order-card').forEach(card => {
+        card.style.display = (filtro === 'all' || card.dataset.status === filtro) ? 'block' : 'none';
       });
     }
   </script>
