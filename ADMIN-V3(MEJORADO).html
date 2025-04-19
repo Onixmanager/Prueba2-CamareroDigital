@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel Administración</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary-color: #2c3e50;
+      --secondary-color: #3498db;
+      --success-color: #27ae60;
+      --warning-color: #f1c40f;
+      --danger-color: #e74c3c;
+      --light-color: #ecf0f1;
+      --text-color: #333;
+      --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      --border-radius: 8px;
+    }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    body {
+      background-color: #f5f5f5;
+      color: var(--text-color);
+    }
+    .admin-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .admin-header {
+      position: relative;
+      text-align: center;
+      padding: 2rem;
+      background-color: var(--primary-color);
+      color: white;
+      border-radius: var(--border-radius);
+      margin-bottom: 2rem;
+    }
+    .logout-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: transparent;
+      border: none;
+      color: white;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    .filters {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .filter-btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      background-color: var(--light-color);
+      transition: all 0.3s ease;
+      font-size: 0.9rem;
+    }
+    .filter-btn.active {
+      background-color: var(--primary-color);
+      color: white;
+    }
+    .orders-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    .order-card {
+      background: white;
+      border-radius: var(--border-radius);
+      padding: 20px;
+      box-shadow: var(--shadow);
+      position: relative;
+    }
+    .order-status {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      padding: 5px 15px;
+      border-radius: var(--border-radius);
+      font-size: 0.8rem;
+      font-weight: bold;
+    }
+    .status-pending {
+      background-color: var(--warning-color);
+      color: var(--text-color);
+    }
+    .status-completed {
+      background-color: var(--success-color);
+      color: white;
+    }
+    .status-cancelled {
+      background-color: var(--danger-color);
+      color: white;
+    }
+    .order-table {
+      font-size: 1.5rem;
+      color: var(--primary-color);
+      margin-bottom: 10px;
+    }
+    .order-time {
+      font-size: 0.9rem;
+      color: #666;
+      margin-bottom: 15px;
+    }
+    .order-items {
+      list-style: none;
+      margin-bottom: 15px;
+    }
+    .order-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #eee;
+    }
+    .order-notes {
+      background-color: #f8f9fa;
+      padding: 10px;
+      border-radius: var(--border-radius);
+      margin-top: 10px;
+      font-size: 0.9rem;
+    }
+    .order-actions {
+      margin-top: 15px;
+      display: flex;
+      gap: 10px;
+    }
+    .action-btn {
+      flex: 1;
+      padding: 8px;
+      border: none;
+      border-radius: var(--border-radius);
+      cursor: pointer;
+      transition: opacity 0.3s;
+      font-size: 0.9rem;
+    }
+    .complete-btn {
+      background-color: var(--success-color);
+      color: white;
+    }
+    .cancel-btn {
+      background-color: var(--danger-color);
+      color: white;
+    }
+    .print-btn {
+      background-color: var(--secondary-color);
+      color: white;
+    }
+    /* Estilos para el modal de login */
+    .login-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      padding: 20px;
+    }
+    .login-content {
+      background: white;
+      padding: 30px;
+      border-radius: var(--border-radius);
+      text-align: center;
+      max-width: 300px;
+      width: 100%;
+    }
+    .login-content h2 {
+      margin-bottom: 20px;
+      color: var(--primary-color);
+      font-size: 1.5rem;
+    }
+    .login-content input {
+      width: 100%;
+      padding: 10px;
+      font-size: 1rem;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: var(--border-radius);
+    }
+    .login-content button {
+      padding: 10px 20px;
+      font-size: 1rem;
+      border: none;
+      border-radius: var(--border-radius);
+      background-color: var(--primary-color);
+      color: white;
+      cursor: pointer;
+      transition: background 0.3s;
+      width: 100%;
+    }
+    .login-content button:hover {
+      background-color: var(--secondary-color);
+    }
+    .login-error {
+      color: red;
+      margin-top: 10px;
+      display: none;
+      font-size: 0.9rem;
+    }
+    /* Media Queries */
+    @media (max-width: 768px) {
+      .admin-container {
+        padding: 10px;
+      }
+      .admin-header {
+        padding: 1.5rem;
+      }
+      .logout-btn {
+        top: 10px;
+        right: 10px;
+        font-size: 0.9rem;
+      }
+      .order-table {
+        font-size: 1.3rem;
+      }
+      .order-time, .order-item, .order-notes, .action-btn {
+        font-size: 0.8rem;
+      }
+      .login-content h2 {
+        font-size: 1.3rem;
+      }
+      .login-content input,
+      .login-content button {
+        font-size: 0.9rem;
+      }
+    }
+    @media (max-width: 480px) {
+      .filters {
+        flex-direction: column;
+        align-items: center;
+      }
+      .filter-btn {
+        width: 100%;
+        margin-bottom: 5px;
+      }
+      .orders-grid {
+        grid-template-columns: 1fr;
+      }
+      .admin-header {
+        padding: 1rem;
+      }
+      .logout-btn {
+        font-size: 0.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Modal de autenticación -->
+  <div id="loginModal" class="login-modal">
+    <div class="login-content">
+      <h2>Ingrese PIN de administrador</h2>
+      <input type="password" id="adminPinInput" placeholder="Ingrese PIN">
+      <button id="loginBtn">Entrar</button>
+      <p id="loginError" class="login-error">PIN incorrecto, intente de nuevo.</p>
+    </div>
+  </div>
+  
+  <div class="admin-container">
+    <header class="admin-header">
+      <h1>Panel de Administración</h1>
+      <p>Pedidos en tiempo real</p>
+      <button id="logoutBtn" class="logout-btn"><i class="fa fa-sign-out-alt"></i> Cerrar sesión</button>
+    </header>
+    
+    <div class="filters">
+      <button class="filter-btn active" data-filter="all">Todos</button>
+      <button class="filter-btn" data-filter="pending">Pendientes</button>
+      <button class="filter-btn" data-filter="completed">Completados</button>
+      <button class="filter-btn" data-filter="cancelled">Cancelados</button>
+    </div>
+    
+    <div class="orders-grid" id="ordersGrid">
+      <!-- Se agregarán los pedidos en tiempo real -->
+    </div>
+  </div>
+
+  <!-- Elemento de audio para el sonido del pedido -->
+  <audio id="orderSound" src="https://www.soundjay.com/button/beep-07.wav" preload="auto"></audio>
+
+  <script type="module">
+    // Nota: La autenticación con PIN aquí es muy básica y se recomienda usar un método más seguro (por ejemplo, Firebase Authentication) en producción.
+    const adminPIN = "Admin041"; // PIN hardcodeado: reemplazar en producción
+    const sessionKey = "adminSession";
+
+    const loginModal = document.getElementById("loginModal");
+    const adminPinInput = document.getElementById("adminPinInput");
+    const loginBtn = document.getElementById("loginBtn");
+    const loginError = document.getElementById("loginError");
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    function showLoginModal() {
+      loginModal.style.display = "flex";
+    }
+
+    function hideLoginModal() {
+      loginModal.style.display = "none";
+    }
+
+    function checkAuth() {
+      if (localStorage.getItem(sessionKey) === "true") {
+        hideLoginModal();
+      } else {
+        showLoginModal();
+      }
+    }
+
+    loginBtn.addEventListener("click", () => {
+      const pinIngresado = adminPinInput.value;
+      if (pinIngresado === adminPIN) {
+        localStorage.setItem(sessionKey, "true");
+        hideLoginModal();
+      } else {
+        loginError.style.display = "block";
+      }
+    });
+
+    logoutBtn.addEventListener("click", () => {
+      localStorage.removeItem(sessionKey);
+      location.reload();
+    });
+
+    // Verifica autenticación al cargar la página
+    checkAuth();
+
+    // Importa funciones de Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    import { getDatabase, ref, onChildAdded, onChildChanged, onChildRemoved, update } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+
+    // Configuración de Firebase – REEMPLAZA con tus credenciales seguras en producción
+    const firebaseConfig = {
+      apiKey: "TU_API_KEY",
+      authDomain: "TU_AUTH_DOMAIN",
+      databaseURL: "TU_DATABASE_URL",
+      projectId: "TU_PROJECT_ID",
+      storageBucket: "TU_STORAGE_BUCKET",
+      messagingSenderId: "TU_MESSAGING_SENDER_ID",
+      appId: "TU_APP_ID"
+    };
+
+    // Inicializa Firebase
+    const appFirebase = initializeApp(firebaseConfig);
+    const db = getDatabase(appFirebase);
+
+    // Referencia a la ruta "pedidos" en Firebase
+    const pedidosRef = ref(db, 'pedidos');
+
+    const ordersGrid = document.getElementById('ordersGrid');
+    const filterButtons = document.querySelectorAll('.filter-btn');
+
+    const orderSound = document.getElementById('orderSound');
+
+    // Función para calcular el tiempo transcurrido
+    function timeAgo(fecha) {
+      const diffMs = Date.now() - new Date(fecha).getTime();
+      const diffMin = Math.floor(diffMs / 60000);
+      if(diffMin < 1) return "Hace unos instantes";
+      return `Hace ${diffMin} minuto${diffMin > 1 ? 's' : ''}`;
+    }
+
+    // Crea el HTML para un pedido
+    function crearOrderCard(key, data) {
+      const status = data.status ? data.status : "pending";
+      let statusClass = "status-pending";
+      let statusText = "Pendiente";
+      if(status === "completed") {
+        statusClass = "status-completed";
+        statusText = "Completado";
+      } else if(status === "cancelled") {
+        statusClass = "status-cancelled";
+        statusText = "Cancelado";
+      }
+      
+      let itemsHTML = "";
+      if (Array.isArray(data.pedido)) {
+        data.pedido.forEach(item => {
+          const nombre = item.name || "Producto";
+          const cantidad = item.qty || 1;
+          const precioItem = (item.price * cantidad).toFixed(2);
+          itemsHTML += `
+            <li class="order-item">
+              <span>${cantidad}x ${nombre}</span>
+              <span>${precioItem}€</span>
+            </li>
+          `;
+        });
+      }
+      
+      const card = document.createElement('div');
+      card.classList.add('order-card');
+      card.setAttribute('data-status', status);
+      card.setAttribute('data-key', key);
+      card.innerHTML = `
+        <div class="order-status ${statusClass}">${statusText}</div>
+        <h2 class="order-table">${data.mesa || 'Mesa Desconocida'}</h2>
+        <div class="order-time">${timeAgo(data.fecha)}</div>
+        <ul class="order-items">
+          ${itemsHTML}
+        </ul>
+        ${data.notas ? `<div class="order-notes"><strong>Notas:</strong> ${data.notas}</div>` : ''}
+        <div class="order-actions">
+          <button class="action-btn complete-btn" data-action="complete">Completar</button>
+          <button class="action-btn cancel-btn" data-action="cancel">Cancelar</button>
+          <button class="action-btn print-btn" data-action="print">Imprimir</button>
+        </div>
+      `;
+      
+      const completeBtn = card.querySelector('[data-action="complete"]');
+      const cancelBtn = card.querySelector('[data-action="cancel"]');
+      const printBtn = card.querySelector('[data-action="print"]');
+      completeBtn.addEventListener('click', () => actualizarEstadoPedido(key, 'completed'));
+      cancelBtn.addEventListener('click', () => actualizarEstadoPedido(key, 'cancelled'));
+      printBtn.addEventListener('click', () => printReceipt(key, data));
+      
+      return card;
+    }
+
+    // Actualiza estado del pedido en Firebase
+    function actualizarEstadoPedido(key, nuevoEstado) {
+      const pedidoRef = ref(db, 'pedidos/' + key);
+      update(pedidoRef, { status: nuevoEstado })
+        .then(() => {
+          console.log(`Pedido ${key} actualizado a ${nuevoEstado}`);
+        })
+        .catch(error => {
+          console.error('Error al actualizar el estado:', error);
+        });
+    }
+
+    // Agrega o actualiza un pedido en el DOM
+    function agregarOActualizarPedido(key, data) {
+      const existente = document.querySelector(`.order-card[data-key="${key}"]`);
+      const card = crearOrderCard(key, data);
+      if (existente) {
+        ordersGrid.replaceChild(card, existente);
+      } else {
+        ordersGrid.appendChild(card);
+      }
+    }
+
+    // Imprime el recibo del pedido
+    function printReceipt(key, data) {
+      const printWindow = window.open('', '', 'height=600,width=400');
+      printWindow.document.write('<html><head><title>Recibo de Pedido</title>');
+      printWindow.document.write('<style>body{font-family: Arial, sans-serif; padding: 20px;} h2{margin-bottom: 10px;} ul{list-style: none; padding: 0;} li{margin-bottom: 5px;}</style>');
+      printWindow.document.write('</head><body>');
+      printWindow.document.write('<h2>Recibo de Pedido</h2>');
+      printWindow.document.write('<p><strong>Mesa:</strong> ' + (data.mesa || 'Mesa Desconocida') + '</p>');
+      printWindow.document.write('<p><strong>Fecha:</strong> ' + new Date(data.fecha).toLocaleString() + '</p>');
+      printWindow.document.write('<ul>');
+      if (Array.isArray(data.pedido)) {
+         data.pedido.forEach(item => {
+            const cantidad = item.qty || 1;
+            const nombre = item.name || 'Producto';
+            const precioTotal = (item.price * cantidad).toFixed(2);
+            printWindow.document.write('<li>' + cantidad + ' x ' + nombre + ' - ' + precioTotal + '€</li>');
+         });
+      }
+      printWindow.document.write('</ul>');
+      if(data.notas) {
+          printWindow.document.write('<p><strong>Notas:</strong> ' + data.notas + '</p>');
+      }
+      printWindow.document.write('</body></html>');
+      printWindow.document.close();
+      printWindow.focus();
+      printWindow.print();
+      printWindow.close();
+    }
+
+    onChildAdded(pedidosRef, (snapshot) => {
+      const key = snapshot.key;
+      const data = snapshot.val();
+      agregarOActualizarPedido(key, data);
+      
+      // Reproduce sonido al recibir un nuevo pedido
+      orderSound.play().catch(error => {
+        console.error("No se pudo reproducir el sonido: ", error);
+      });
+    });
+
+    onChildChanged(pedidosRef, (snapshot) => {
+      const key = snapshot.key;
+      const data = snapshot.val();
+      agregarOActualizarPedido(key, data);
+    });
+
+    onChildRemoved(pedidosRef, (snapshot) => {
+      const key = snapshot.key;
+      const existente = document.querySelector(`.order-card[data-key="${key}"]`);
+      if (existente) {
+        ordersGrid.removeChild(existente);
+      }
+    });
+
+    filterButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        filterButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const filtro = btn.getAttribute('data-filter');
+        filtrarPedidos(filtro);
+      });
+    });
+
+    function filtrarPedidos(filtro) {
+      const cards = document.querySelectorAll('.order-card');
+      cards.forEach(card => {
+        const status = card.getAttribute('data-status');
+        if(filtro === 'all' || filtro === status) {
+          card.style.display = 'block';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+  </script>
+</body>
+</html>
