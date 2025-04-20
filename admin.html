@@ -4,7 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Panel Administración</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
   <style>
     :root {
       --primary-color: #2c3e50;
@@ -44,6 +45,7 @@
       color: white;
       border-radius: var(--border-radius);
       margin-bottom: 2rem;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
     }
 
     .header-controls {
@@ -72,6 +74,8 @@
 
     .logout-btn:hover {
       background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     }
 
     #deleteAllBtn {
@@ -88,6 +92,7 @@
       margin-bottom: 2rem;
       flex-wrap: wrap;
       justify-content: center;
+      transition: all 0.3s ease;
     }
 
     .filter-btn {
@@ -98,11 +103,40 @@
       background-color: var(--light-color);
       transition: all 0.3s ease;
       font-size: 0.9rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .filter-btn::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 0;
+      height: 3px;
+      background-color: var(--primary-color);
+      transition: width 0.3s ease;
+    }
+
+    .filter-btn:hover::before {
+      width: 100%;
+    }
+
+    .filter-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
     }
 
     .filter-btn.active {
       background-color: var(--primary-color);
       color: white;
+      transform: translateY(-2px);
+    }
+
+    .filter-btn.active::before {
+      width: 100%;
+      background-color: var(--secondary-color);
     }
 
     .filters-select {
@@ -120,6 +154,13 @@
       background-position: right 12px center;
       background-size: 24px;
       cursor: pointer;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .filters-select:focus {
+      border-color: var(--secondary-color);
+      box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.3);
+      outline: none;
     }
 
     .orders-grid {
@@ -134,7 +175,31 @@
       padding: 20px;
       box-shadow: var(--shadow);
       position: relative;
-      transition: transform 0.3s ease;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      border-left: 4px solid transparent;
+      animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .order-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+    }
+
+    .order-card[data-status="pending"] {
+      border-left-color: var(--warning-color);
+    }
+
+    .order-card[data-status="completed"] {
+      border-left-color: var(--success-color);
+    }
+
+    .order-card[data-status="cancelled"] {
+      border-left-color: var(--danger-color);
     }
 
     .order-status {
@@ -145,6 +210,7 @@
       border-radius: var(--border-radius);
       font-size: 0.8rem;
       font-weight: bold;
+      transition: all 0.3s ease;
     }
 
     .status-pending {
@@ -166,17 +232,56 @@
       font-size: 1.5rem;
       color: var(--primary-color);
       margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+    }
+
+    .order-table::before {
+      content: '\f2e7';
+      font-family: 'Font Awesome 5 Free';
+      font-weight: 900;
+      margin-right: 10px;
+      color: var(--secondary-color);
     }
 
     .order-time {
       font-size: 0.9rem;
       color: #666;
       margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+    }
+
+    .order-time::before {
+      content: '\f017';
+      font-family: 'Font Awesome 5 Free';
+      font-weight: 900;
+      margin-right: 5px;
+      color: #888;
     }
 
     .order-items {
       list-style: none;
       margin-bottom: 15px;
+      max-height: 200px;
+      overflow-y: auto;
+      padding-right: 5px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--secondary-color) #eee;
+    }
+
+    .order-items::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .order-items::-webkit-scrollbar-track {
+      background: #eee;
+      border-radius: 10px;
+    }
+
+    .order-items::-webkit-scrollbar-thumb {
+      background-color: var(--secondary-color);
+      border-radius: 10px;
     }
 
     .order-item {
@@ -184,6 +289,11 @@
       justify-content: space-between;
       padding: 8px 0;
       border-bottom: 1px solid #eee;
+      transition: background-color 0.2s ease;
+    }
+
+    .order-item:hover {
+      background-color: rgba(52, 152, 219, 0.05);
     }
 
     .order-notes {
@@ -192,22 +302,58 @@
       border-radius: var(--border-radius);
       margin-top: 10px;
       font-size: 0.9rem;
+      border-left: 3px solid var(--secondary-color);
+      transition: all 0.3s ease;
+    }
+
+    .order-notes:hover {
+      background-color: #edf2f7;
+      transform: translateX(2px);
     }
 
     .order-actions {
       margin-top: 15px;
-      display: flex;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
       gap: 10px;
     }
 
     .action-btn {
-      flex: 1;
-      padding: 8px;
+      padding: 10px 8px;
       border: none;
       border-radius: var(--border-radius);
       cursor: pointer;
-      transition: opacity 0.3s;
+      transition: all 0.3s ease;
       font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .action-btn::after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: -100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: 0.5s;
+    }
+
+    .action-btn:hover::after {
+      left: 100%;
+    }
+
+    .action-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .action-btn:active {
+      transform: translateY(1px);
     }
 
     .complete-btn {
@@ -215,14 +361,26 @@
       color: white;
     }
 
+    .complete-btn:hover {
+      background-color: #219653;
+    }
+
     .cancel-btn {
       background-color: var(--danger-color);
       color: white;
     }
 
+    .cancel-btn:hover {
+      background-color: #c0392b;
+    }
+
     .print-btn {
       background-color: var(--secondary-color);
       color: white;
+    }
+
+    .print-btn:hover {
+      background-color: #2980b9;
     }
 
     .login-modal {
@@ -237,6 +395,7 @@
       align-items: center;
       z-index: 9999;
       padding: 20px;
+      backdrop-filter: blur(5px);
     }
 
     .confirm-modal {
@@ -251,6 +410,7 @@
       align-items: center;
       z-index: 9999;
       padding: 20px;
+      backdrop-filter: blur(5px);
     }
 
     .confirm-content {
@@ -260,6 +420,8 @@
       text-align: center;
       max-width: 400px;
       width: 100%;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      animation: modalFadeIn 0.3s ease;
     }
 
     .confirm-buttons {
@@ -276,7 +438,13 @@
       text-align: center;
       max-width: 300px;
       width: 100%;
-      box-shadow: 0 0 20px rgba(0,0,0,0.2);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      animation: modalFadeIn 0.3s ease;
+    }
+
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: translateY(-50px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .login-content h2 {
@@ -285,6 +453,19 @@
       font-size: 1.5rem;
       text-transform: uppercase;
       letter-spacing: 1px;
+      position: relative;
+      padding-bottom: 10px;
+    }
+
+    .login-content h2::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 50px;
+      height: 3px;
+      background-color: var(--secondary-color);
     }
 
     .login-content input {
@@ -294,12 +475,13 @@
       border: 2px solid #ddd;
       border-radius: 6px;
       font-size: 1rem;
-      transition: border-color 0.3s;
+      transition: all 0.3s;
     }
 
     .login-content input:focus {
       border-color: var(--primary-color);
       outline: none;
+      box-shadow: 0 0 0 3px rgba(44, 62, 80, 0.2);
     }
 
     .login-content button {
@@ -310,12 +492,30 @@
       border: none;
       border-radius: 6px;
       cursor: pointer;
-      transition: transform 0.2s, background 0.3s;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .login-content button::after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: -100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: 0.5s;
+    }
+
+    .login-content button:hover::after {
+      left: 100%;
     }
 
     .login-content button:hover {
       background: var(--secondary-color);
       transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
 
     .login-error {
@@ -323,6 +523,13 @@
       margin-top: 15px;
       font-weight: bold;
       display: none;
+      animation: shake 0.5s ease;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-5px); }
+      40%, 80% { transform: translateX(5px); }
     }
 
     @media (max-width: 768px) {
@@ -346,9 +553,8 @@
       .header-controls {
         flex-wrap: wrap;
         justify-content: flex-end;
-        top: 10px;
-        right: 10px;
-        gap: 6px;
+        position: static;
+        margin-top: 15px;
       }
 
       .admin-container {
@@ -365,6 +571,10 @@
 
       .order-time, .order-item, .order-notes, .action-btn {
         font-size: 0.8rem;
+      }
+
+      .order-actions {
+        grid-template-columns: 1fr;
       }
     }
 
@@ -393,6 +603,36 @@
         padding: 1rem;
       }
     }
+
+    /* Estilos de clasificación */
+    .sorting-animation {
+      transition: all 0.5s ease;
+    }
+
+    .filter-btn.active {
+      animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(52, 152, 219, 0.4); }
+      70% { box-shadow: 0 0 0 10px rgba(52, 152, 219, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(52, 152, 219, 0); }
+    }
+
+    .filter-indicator {
+      text-align: center;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+      color: var(--primary-color);
+      opacity: 0;
+      transform: translateY(-10px);
+      transition: all 0.3s ease;
+    }
+
+    .filter-indicator.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
   </style>
 </head>
 <body>
@@ -410,15 +650,15 @@
       <h2>¿Está seguro de borrar todos los pedidos?</h2>
       <p>Esta acción es irreversible y eliminará todos los pedidos de Firebase.</p>
       <div class="confirm-buttons">
-        <button id="confirmDelete" class="action-btn danger">Borrar Todo</button>
-        <button id="cancelDelete" class="action-btn secondary">Cancelar</button>
+        <button id="confirmDelete" class="action-btn cancel-btn">Borrar Todo</button>
+        <button id="cancelDelete" class="action-btn print-btn">Cancelar</button>
       </div>
     </div>
   </div>
   
   <div class="admin-container">
     <header class="admin-header">
-      <h1>Panel de Administración</h1>
+      <h1 class="text-2xl font-bold mb-2">Panel de Administración</h1>
       <p>Pedidos en tiempo real</p>
       <div class="header-controls">
         <button id="deleteAllBtn" class="logout-btn">
@@ -447,6 +687,10 @@
       <button class="filter-btn" data-filter="cancelled">Cancelados</button>
     </div>
     
+    <div id="filterIndicator" class="filter-indicator">
+      Mostrando: <span id="currentFilter">Todos los pedidos</span>
+    </div>
+    
     <div class="orders-grid" id="ordersGrid"></div>
   </div>
 
@@ -468,7 +712,9 @@
       soundToggle: document.getElementById("soundToggle"),
       mobileFilters: document.getElementById("mobileFilters"),
       filterButtons: document.querySelectorAll('.filter-btn'),
-      ordersGrid: document.getElementById('ordersGrid')
+      ordersGrid: document.getElementById('ordersGrid'),
+      filterIndicator: document.getElementById('filterIndicator'),
+      currentFilter: document.getElementById('currentFilter')
     };
 
     // Control de sonido
@@ -508,6 +754,18 @@
         hideLoginModal();
       } else {
         elements.loginError.style.display = "block";
+        // Reiniciar la animación
+        elements.loginError.style.animation = 'none';
+        setTimeout(() => {
+          elements.loginError.style.animation = 'shake 0.5s ease';
+        }, 10);
+      }
+    });
+    
+    // Permitir login con Enter
+    elements.adminPinInput.addEventListener("keyup", (event) => {
+      if (event.key === "Enter") {
+        elements.loginBtn.click();
       }
     });
 
@@ -520,7 +778,7 @@
 
     // Firebase
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-    import { getDatabase, ref, onChildAdded, onChildChanged, onChildRemoved, update, get } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+    import { getDatabase, ref, onChildAdded, onChildChanged, onChildRemoved, update, get, remove } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCzZBL-GfbxbWtPzMHOkSgnfF0UXD7wt4Y",
@@ -541,15 +799,18 @@
     // Funciones de pedidos
     async function borrarTodosLosPedidos() {
       try {
-        const pedidosSnapshot = await get(pedidosRef);
-        const updates = {};
-        pedidosSnapshot.forEach((childSnapshot) => {
-          updates[childSnapshot.key] = null;
-        });
-        await update(ref(db), updates);
+        // Usar remove() directamente en la referencia de pedidos para eliminar todo
+        await remove(pedidosRef);
+        console.log("Todos los pedidos han sido eliminados permanentemente");
+        
+        // Mostrar mensaje de éxito
+        alert("Todos los pedidos han sido eliminados correctamente");
+        
+        // Limpiar la interfaz
         elements.ordersGrid.innerHTML = '';
       } catch (error) {
         console.error('Error al borrar pedidos:', error);
+        alert("Error al eliminar los pedidos: " + error.message);
       }
     }
 
@@ -632,9 +893,15 @@
         </ul>
         ${data.notas ? `<div class="order-notes"><strong>Notas:</strong> ${data.notas}</div>` : ''}
         <div class="order-actions">
-          <button class="action-btn complete-btn" data-action="complete">Completar</button>
-          <button class="action-btn cancel-btn" data-action="cancel">Cancelar</button>
-          <button class="action-btn print-btn" data-action="print">Imprimir</button>
+          <button class="action-btn complete-btn" data-action="complete">
+            <i class="fas fa-check-circle mr-1"></i> Completar
+          </button>
+                    <button class="action-btn cancel-btn" data-action="cancel">
+            <i class="fas fa-times-circle mr-1"></i> Cancelar
+          </button>
+          <button class="action-btn print-btn" data-action="print">
+            <i class="fas fa-print mr-1"></i> Imprimir
+          </button>
         </div>
       `;
       
@@ -650,38 +917,87 @@
 
     function actualizarEstadoPedido(key, nuevoEstado) {
       const pedidoRef = ref(db, 'pedidos/' + key);
-      update(pedidoRef, { status: nuevoEstado })
-        .then(() => {
+      // Actualización optimista del DOM
+      const card = document.querySelector(`.order-card[data-key="${key}"]`);
+      if (card) {
+        // Añadir efectos de transición
+        card.style.transition = "all 0.5s ease";
+        
+        setTimeout(() => {
+          card.setAttribute('data-status', nuevoEstado);
+          const statusElement = card.querySelector('.order-status');
+          statusElement.className = `order-status status-${nuevoEstado}`;
+          statusElement.textContent = nuevoEstado === 'completed' ? 'Completado' 
+                               : nuevoEstado === 'cancelled' ? 'Cancelado' 
+                               : 'Pendiente';
+        
+          // Aplicar filtro inmediatamente con animación
           const currentFilter = document.querySelector('.filter-btn.active').dataset.filter;
-          const card = document.querySelector(`.order-card[data-key="${key}"]`);
-          
-          if (currentFilter !== 'all' && currentFilter !== nuevoEstado) {
-            card.style.transform = 'scale(0.9)';
-            setTimeout(() => card.remove(), 300);
+          if(currentFilter === 'all' || currentFilter === nuevoEstado) {
+            card.style.display = 'block';
+            card.style.opacity = '1';
+            card.style.transform = 'scale(1)';
           } else {
-            card.setAttribute('data-status', nuevoEstado);
-            const statusElement = card.querySelector('.order-status');
-            statusElement.className = `order-status status-${nuevoEstado}`;
-            statusElement.textContent = nuevoEstado === 'completed' ? 'Completado' : 'Cancelado';
+            card.style.opacity = '0';
+            card.style.transform = 'scale(0.8)';
+            setTimeout(() => {
+              card.style.display = 'none';
+            }, 500);
           }
-        })
-        .catch(error => console.error('Error al actualizar el estado:', error));
+        }, 50);
+      }
+
+      // Actualizar Firebase
+      update(pedidoRef, { status: nuevoEstado }).catch(error => {
+        console.error('Error al actualizar el estado:', error);
+        // Revertir cambios en caso de error
+        if (card) {
+          card.setAttribute('data-status', 'pending');
+          const statusElement = card.querySelector('.order-status');
+          statusElement.className = 'order-status status-pending';
+          statusElement.textContent = 'Pendiente';
+          filtrarPedidos(currentFilter);
+        }
+      });
     }
 
     function agregarOActualizarPedido(key, data) {
       const existente = document.querySelector(`.order-card[data-key="${key}"]`);
       const card = crearOrderCard(key, data);
+      
       if (existente) {
-        elements.ordersGrid.replaceChild(card, existente);
+        // Aplicar transición
+        existente.style.opacity = '0';
+        existente.style.transform = 'scale(0.8)';
+        
+        setTimeout(() => {
+          elements.ordersGrid.replaceChild(card, existente);
+          // Asegurarse de que se ve si corresponde al filtro actual
+          const currentFilter = document.querySelector('.filter-btn.active').dataset.filter;
+          if (currentFilter !== 'all' && card.dataset.status !== currentFilter) {
+            card.style.display = 'none';
+          }
+        }, 300);
       } else {
+        card.style.opacity = '0';
         elements.ordersGrid.appendChild(card);
+        
+        // Aplicar transición de entrada
+        setTimeout(() => {
+          card.style.opacity = '1';
+          // Asegurarse de que se ve si corresponde al filtro actual
+          const currentFilter = document.querySelector('.filter-btn.active').dataset.filter;
+          if (currentFilter !== 'all' && card.dataset.status !== currentFilter) {
+            card.style.display = 'none';
+          }
+        }, 50);
       }
     }
-
+    
     function printReceipt(key, data) {
       const printWindow = window.open('', '', 'height=600,width=400');
       printWindow.document.write('<html><head><title>Recibo de Pedido</title>');
-      printWindow.document.write('<style>body{font-family: Arial, sans-serif; padding: 20px;} h2{margin-bottom: 10px;} ul{list-style: none; padding: 0;} li{margin-bottom: 5px;}</style>');
+      printWindow.document.write('<style>body{font-family: Arial, sans-serif; padding: 20px;} h2{margin-bottom: 10px;} ul{list-style: none; padding: 0;} li{margin-bottom: 5px; padding: 5px 0; border-bottom: 1px solid #eee;}</style>');
       printWindow.document.write('</head><body>');
       printWindow.document.write('<h2>Recibo de Pedido</h2>');
       printWindow.document.write('<p><strong>Mesa:</strong> ' + (data.mesa || 'Mesa Desconocida') + '</p>');
@@ -737,11 +1053,37 @@
 
     onChildRemoved(pedidosRef, (snapshot) => {
       const existente = document.querySelector(`.order-card[data-key="${snapshot.key}"]`);
-      if (existente) existente.remove();
+      if (existente) {
+        // Aplicar transición de salida
+        existente.style.opacity = '0';
+        existente.style.transform = 'scale(0.8)';
+        setTimeout(() => {
+          existente.remove();
+        }, 300);
+      }
     });
 
-    // Filtrado
+    // Filtrado con animaciones mejoradas
     function updateFilters(newFilter) {
+      let filterText = "";
+      switch(newFilter) {
+        case 'all':
+          filterText = "Todos los pedidos";
+          break;
+        case 'pending':
+          filterText = "Pedidos pendientes";
+          break;
+        case 'completed':
+          filterText = "Pedidos completados";
+          break;
+        case 'cancelled':
+          filterText = "Pedidos cancelados";
+          break;
+      }
+      
+      elements.currentFilter.textContent = filterText;
+      elements.filterIndicator.classList.add('active');
+      
       elements.filterButtons.forEach(btn => {
         btn.classList.toggle('active', btn.dataset.filter === newFilter);
       });
@@ -756,9 +1098,32 @@
 
     function filtrarPedidos(filtro) {
       document.querySelectorAll('.order-card').forEach(card => {
-        card.style.display = (filtro === 'all' || card.dataset.status === filtro) ? 'block' : 'none';
+        if (filtro === 'all' || card.dataset.status === filtro) {
+          card.classList.add('sorting-animation');
+          card.style.opacity = '0';
+          card.style.transform = 'translateY(20px)';
+          
+          setTimeout(() => {
+            card.style.display = 'block';
+            setTimeout(() => {
+              card.style.opacity = '1';
+              card.style.transform = 'translateY(0)';
+            }, 50);
+          }, 300);
+        } else {
+          card.classList.add('sorting-animation');
+          card.style.opacity = '0';
+          card.style.transform = 'translateY(-20px)';
+          
+          setTimeout(() => {
+            card.style.display = 'none';
+          }, 300);
+        }
       });
     }
+    
+    // Inicializar con "Todos" como filtro activo
+    updateFilters('all');
   </script>
 </body>
 </html>
