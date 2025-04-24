@@ -1622,365 +1622,498 @@
       document.getElementById('modalImg').style.display = "";
     }
     
-    // Incrementa o decrementa cantidad
-    const decreaseQtyBtn = document.getElementById('decreaseQty');
-    const increaseQtyBtn = document.getElementById('increaseQty');
-    decreaseQtyBtn.addEventListener('click', () => {
-      const modalQtyDisplay = document.getElementById('modalQty');
-      let qty = parseInt(modalQtyDisplay.textContent);
-      if(qty > 1) {
-        qty--;
-        modalQtyDisplay.textContent = qty;
-        if(selectedProduct)
-          document.getElementById('modalSubtotal').textContent = (selectedProduct.price * qty).toFixed(2);
-      }
-    });
-    increaseQtyBtn.addEventListener('click', () => {
-      const modalQtyDisplay = document.getElementById('modalQty');
-      let qty = parseInt(modalQtyDisplay.textContent);
-      qty++;
-      modalQtyDisplay.textContent = qty;
-      if(selectedProduct)
-          document.getElementById('modalSubtotal').textContent = (selectedProduct.price * qty).toFixed(2);
+   // Incrementa o decrementa cantidad con feedback visual
+const decreaseQtyBtn = document.getElementById('decreaseQty');
+const increaseQtyBtn = document.getElementById('increaseQty');
+decreaseQtyBtn.addEventListener('click', () => {
+  const modalQtyDisplay = document.getElementById('modalQty');
+  let qty = parseInt(modalQtyDisplay.textContent);
+  if(qty > 1) {
+    qty--;
+    modalQtyDisplay.textContent = qty;
+    
+    // Efecto visual al cambiar cantidad
+    modalQtyDisplay.style.transform = "scale(0.8)";
+    setTimeout(() => {
+      modalQtyDisplay.style.transform = "scale(1)";
+    }, 200);
+    
+    if(selectedProduct)
+      document.getElementById('modalSubtotal').textContent = (selectedProduct.price * qty).toFixed(2);
+  } else {
+    // Feedback visual si no se puede reducir más
+    decreaseQtyBtn.classList.add('shake');
+    setTimeout(() => {
+      decreaseQtyBtn.classList.remove('shake');
+    }, 500);
+  }
+});
+increaseQtyBtn.addEventListener('click', () => {
+  const modalQtyDisplay = document.getElementById('modalQty');
+  let qty = parseInt(modalQtyDisplay.textContent);
+  qty++;
+  modalQtyDisplay.textContent = qty;
+  
+  // Efecto visual al cambiar cantidad
+  modalQtyDisplay.style.transform = "scale(1.2)";
+  setTimeout(() => {
+    modalQtyDisplay.style.transform = "scale(1)";
+  }, 200);
+  
+  if(selectedProduct)
+    document.getElementById('modalSubtotal').textContent = (selectedProduct.price * qty).toFixed(2);
+});
+
+// Agrega producto al carrito con animación
+function addProductToCart() {
+  if (!selectedProduct) return;
+  const modalQtyDisplay = document.getElementById('modalQty');
+  const modalNote = document.getElementById('modalNote');
+  if(selectedProduct.category === "Menu") {
+    // Valida que se hayan seleccionado todas las opciones
+    const selections = {};
+    let isValid = true;
+    
+    // Verifica si menuOptions existe
+    if (!selectedProduct.menuOptions || typeof selectedProduct.menuOptions !== 'object') {
+      showMessage("Este menú no tiene opciones configuradas correctamente.");
+      return;
+    }
+    
+    Object.keys(selectedProduct.menuOptions).forEach(section => {
+      const selected = document.querySelector(`input[name="${section}"]:checked`);
+      if (!selected) isValid = false;
+      selections[section] = selected ? selected.value : null;
     });
     
-    // Agrega producto al carrito
-    function addProductToCart() {
-      if (!selectedProduct) return;
-      const modalQtyDisplay = document.getElementById('modalQty');
-      const modalNote = document.getElementById('modalNote');
-      if(selectedProduct.category === "Menu") {
-        // Valida que se hayan seleccionado todas las opciones
-        const selections = {};
-        let isValid = true;
-        
-        // Verifica si menuOptions existe
-        if (!selectedProduct.menuOptions || typeof selectedProduct.menuOptions !== 'object') {
-          showMessage("Este menú no tiene opciones configuradas correctamente.");
-          return;
-        }
-        
-        Object.keys(selectedProduct.menuOptions).forEach(section => {
-          const selected = document.querySelector(`input[name="${section}"]:checked`);
-          if (!selected) isValid = false;
-          selections[section] = selected ? selected.value : null;
-        });
-        
-        if (!isValid) {
-          showMessage("Debe seleccionar todas las opciones del menú.");
-          return;
-        }
-        
-        // Construye la nota a partir de las selecciones
-        let note = Object.entries(selections)
-          .map(([section, value]) => `${section}: ${value}`)
-          .join(' | ');
-          
-        const extraNotes = document.getElementById('menuNotes').value.trim();
-        if (extraNotes) note += ` | Notas: ${extraNotes}`;
-        
-        // Agrega al carrito con cantidad 1 y guarda la selección
-        cart.push({ 
-          ...selectedProduct, 
-          qty: 1,
-          note,
-          menuSelections: selections,
-          addedAt: new Date().toISOString()
-        });
-        updateCart();
-        closeModal();
-        return;
-      }
+    if (!isValid) {
+      showMessage("Debe seleccionar todas las opciones del menú.");
+      return;
+    }
+    
+    // Construye la nota a partir de las selecciones
+    let note = Object.entries(selections)
+      .map(([section, value]) => `${section}: ${value}`)
+      .join(' | ');
       
-      // Para productos normales
-      let qty = parseInt(modalQtyDisplay.textContent);
-      let note = modalNote.value.trim();
-      
-      const exist = cart.find(item => item.id === selectedProduct.id && item.note === note);
-      if (exist) {
-        exist.qty += qty;
+    const extraNotes = document.getElementById('menuNotes').value.trim();
+    if (extraNotes) note += ` | Notas: ${extraNotes}`;
+    
+    // Agrega al carrito con cantidad 1 y guarda la selección
+    cart.push({ 
+      ...selectedProduct, 
+      qty: 1,
+      note,
+      menuSelections: selections,
+      addedAt: new Date().toISOString()
+    });
+    
+    // Feedback visual
+    animateCartAddition();
+    
+    updateCart();
+    closeModal();
+    return;
+  }
+  
+  // Para productos normales
+  let qty = parseInt(modalQtyDisplay.textContent);
+  let note = modalNote.value.trim();
+  
+  const exist = cart.find(item => item.id === selectedProduct.id && item.note === note);
+  if (exist) {
+    exist.qty += qty;
+  } else {
+    cart.push({ 
+      ...selectedProduct, 
+      qty, 
+      note,
+      addedAt: new Date().toISOString()
+    });
+  }
+  
+  // Feedback visual
+  animateCartAddition();
+  
+  updateCart();
+  closeModal();
+}
+
+// Animación para agregar al carrito
+function animateCartAddition() {
+  const cartBtn = document.getElementById('openCart');
+  cartBtn.classList.add('animate__animated', 'animate__rubberBand');
+  
+  setTimeout(() => {
+    cartBtn.classList.remove('animate__animated', 'animate__rubberBand');
+  }, 1000);
+}
+
+// Elimina producto del carrito con animación
+function removeCartItem(index) {
+  const cartItemsDiv = document.getElementById('cartItems');
+  // Selecciona el elemento a eliminar
+  const itemElement = cartItemsDiv.children[index];
+  
+  // Anima la salida
+  itemElement.style.transform = "translateX(100px)";
+  itemElement.style.opacity = "0";
+  
+  // Después de la animación, elimina del carrito
+  setTimeout(() => {
+    cart.splice(index, 1);
+    updateCart();
+  }, 300);
+}
+
+// Actualiza vista del carrito con animaciones
+function updateCart() {
+  const cartItemsDiv = document.getElementById('cartItems');
+  const cartTotal = document.getElementById('cartTotal');
+  let totalPrice = 0;
+  cartItemsDiv.innerHTML = "";
+
+  if (cart.length === 0) {
+    // Muestra mensaje de carrito vacío
+    cartItemsDiv.innerHTML = `
+      <div class="empty-cart">
+        <i class="fas fa-shopping-basket"></i>
+        <p>Tu carrito está vacío</p>
+        <small>Los productos que agregues aparecerán aquí</small>
+      </div>`;
+  } else {
+    // Renderiza items del carrito con animación
+    let delay = 0;
+    cart.forEach((item, index) => {
+      totalPrice += item.price * item.qty;
+      const div = document.createElement('div');
+      let noteDisplay = '';
+      if(item.category === "Menu") {
+        noteDisplay = Object.values(item.menuSelections).join(' + ');
+        if(item.note.includes("| Notas:")) {
+          noteDisplay += ' ' + item.note.split("| Notas:")[1].trim();
+        }
       } else {
-        cart.push({ 
-          ...selectedProduct, 
-          qty, 
-          note,
-          addedAt: new Date().toISOString()
-        });
+        noteDisplay = item.note;
       }
-      updateCart();
-      closeModal();
-    }
-    
-    // Elimina producto del carrito
-    function removeCartItem(index) {
-      cart.splice(index, 1);
-      updateCart();
-    }
-    
-    // Actualiza vista del carrito
-    function updateCart() {
-      const cartItemsDiv = document.getElementById('cartItems');
-      const cartTotal = document.getElementById('cartTotal');
-      let totalPrice = 0;
-      cartItemsDiv.innerHTML = "";
-      cart.forEach((item, index) => {
-        totalPrice += item.price * item.qty;
-        const div = document.createElement('div');
-        let noteDisplay = '';
-        if(item.category === "Menu") {
-          noteDisplay = Object.values(item.menuSelections).join(' + ');
-          if(item.note.includes("| Notas:")) {
-            noteDisplay += ' ' + item.note.split("| Notas:")[1].trim();
-          }
-        } else {
-          noteDisplay = item.note;
-        }
-        div.className = 'cart-item';
-        div.innerHTML = `
-          <span class="item-info">${item.name} x ${item.qty}${noteDisplay ? ' (' + noteDisplay + ')' : ''}</span>
-          <span class="item-price">${(item.price * item.qty).toFixed(2)} €</span>
-        `;
-        const deleteBtn = document.createElement('button');
-        deleteBtn.className = 'delete-item-btn';
-        deleteBtn.innerHTML = `<svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor">
-                                  <path d="M9,3V4H4V6H5V19A1,1 0 0,0 6,20H18A1,1 0 0,0 19,19V6H20V4H15V3H9M7,6H17V19H7V6Z" />
-                                </svg>`;
-        deleteBtn.addEventListener('click', () => removeCartItem(index));
-        div.appendChild(deleteBtn);
-        cartItemsDiv.appendChild(div);
-      });
-      cartTotal.textContent = totalPrice.toFixed(2);
-      let totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
-      const cartCount = document.getElementById('cartCount');
-      if(totalItems > 0) {
-        cartCount.style.display = "block";
-        cartCount.textContent = totalItems;
-      } else {
-        cartCount.style.display = "none";
-      }
+      div.className = 'cart-item';
+      div.style.opacity = "0";
+      div.style.transform = "translateY(10px)";
+      div.innerHTML = `
+        <span class="item-info">${item.name} x ${item.qty}${noteDisplay ? ' (' + noteDisplay + ')' : ''}</span>
+        <span class="item-price">${(item.price * item.qty).toFixed(2)} €</span>`;
       
-      // Persistir carrito en localStorage
-      try {
-        localStorage.setItem('restaurantCart', JSON.stringify(cart));
-      } catch (e) {
-        console.error("Error al guardar carrito en localStorage:", e);
-      }
+      const deleteBtn = document.createElement('button');
+      deleteBtn.className = 'delete-item-btn';
+      deleteBtn.innerHTML = `<svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M9,3V4H4V6H5V19A1,1 0 0,0 6,20H18A1,1 0 0,0 19,19V6H20V4H15V3H9M7,6H17V19H7V6Z" />
+      </svg>`;
+      deleteBtn.addEventListener('click', () => removeCartItem(index));
       
-      window.cart = cart;
+      div.appendChild(deleteBtn);
+      cartItemsDiv.appendChild(div);
+      
+      // Animación de entrada
+      setTimeout(() => {
+        div.style.opacity = "1";
+        div.style.transform = "translateY(0)";
+      }, delay);
+      delay += 50;
+    });
+  }
+
+  cartTotal.textContent = totalPrice.toFixed(2);
+
+  let totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
+  const cartCount = document.getElementById('cartCount');
+  if (totalItems > 0) {
+    cartCount.style.display = "block";
+    cartCount.textContent = totalItems;
+  } else {
+    cartCount.style.display = "none";
+  }
+
+  // Persistir carrito en localStorage
+  try {
+    localStorage.setItem('restaurantCart', JSON.stringify(cart));
+  } catch (e) {
+    console.error("Error al guardar carrito en localStorage:", e);
+  }
+
+  window.cart = cart;
+}
+
+// Abre y cierra panel del carrito con animación
+const openCartBtn = document.getElementById('openCart');
+const cartPanel = document.getElementById('cartPanel');
+const closeCartPanelBtn = document.getElementById('closeCartPanel');
+openCartBtn.addEventListener('click', () => {
+  cartPanel.classList.add('open');
+  document.getElementById('overlay').classList.add('active');
+  document.body.classList.add('no-scroll');
+});
+closeCartPanelBtn.addEventListener('click', () => {
+  cartPanel.classList.remove('open');
+  setTimeout(() => {
+    document.getElementById('overlay').classList.remove('active');
+    document.body.classList.remove('no-scroll');
+  }, 300);
+});
+
+// Modal de confirmación de pedido
+const checkoutBtn = document.getElementById('checkoutBtn');
+const orderModal = document.getElementById('orderModal');
+const orderTotalDisplay = document.getElementById('orderTotal');
+const closeOrderModalBtn = document.getElementById('closeOrderModal');
+const cancelOrderBtn = document.getElementById('cancelOrder');
+const confirmOrderBtn = document.getElementById('confirmOrder');
+checkoutBtn.addEventListener('click', () => {
+  if (cart.length > 0) {
+    orderTotalDisplay.textContent = document.getElementById('cartTotal').textContent;
+    orderModal.classList.add('active');
+    document.getElementById('overlay').classList.add('active');
+    document.body.classList.add('no-scroll');
+  } else {
+    showMessage("El carrito está vacío.");
+  }
+});
+closeOrderModalBtn.addEventListener('click', () => {
+  orderModal.classList.remove('active');
+  setTimeout(() => {
+    document.getElementById('overlay').classList.remove('active');
+    document.body.classList.remove('no-scroll');
+  }, 300);
+});
+cancelOrderBtn.addEventListener('click', () => {
+  orderModal.classList.remove('active');
+  setTimeout(() => {
+    document.getElementById('overlay').classList.remove('active');
+    document.body.classList.remove('no-scroll');
+  }, 300);
+});
+confirmOrderBtn.addEventListener('click', async () => {
+  try {
+    // Animación durante el proceso
+    confirmOrderBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Procesando...';
+    confirmOrderBtn.disabled = true;
+    
+    // Mostrar mensaje de procesamiento
+    orderModal.classList.remove('active');
+    showMessage("Procesando pedido...", true);
+    
+    if (typeof window.realizarPedido === 'function') {
+      await window.realizarPedido();
+    } else {
+      console.log("Función realizarPedido no disponible. Simulando pedido...");
+      // Simular el pedido como respaldo
+      await new Promise(resolve => setTimeout(resolve, 1000));
     }
     
-    // Abre y cierra panel del carrito
-    const openCartBtn = document.getElementById('openCart');
-    const cartPanel = document.getElementById('cartPanel');
-    const closeCartPanelBtn = document.getElementById('closeCartPanel');
-    openCartBtn.addEventListener('click', () => {
-      cartPanel.classList.add('open');
-      document.getElementById('overlay').classList.add('active');
-      document.body.classList.add('no-scroll');
-    });
-    closeCartPanelBtn.addEventListener('click', () => {
-      cartPanel.classList.remove('open');
-      document.getElementById('overlay').classList.remove('active');
-      document.body.classList.remove('no-scroll');
-    });
-    
-    // Modal de confirmación de pedido
-    const checkoutBtn = document.getElementById('checkoutBtn');
-    const orderModal = document.getElementById('orderModal');
-    const orderTotalDisplay = document.getElementById('orderTotal');
-    const closeOrderModalBtn = document.getElementById('closeOrderModal');
-    const cancelOrderBtn = document.getElementById('cancelOrder');
-    const confirmOrderBtn = document.getElementById('confirmOrder');
-    checkoutBtn.addEventListener('click', () => {
-      if (cart.length > 0) {
-        orderTotalDisplay.textContent = document.getElementById('cartTotal').textContent;
-        orderModal.classList.add('active');
-        document.getElementById('overlay').classList.add('active');
-        document.body.classList.add('no-scroll');
-      } else {
-        showMessage("El carrito está vacío.");
-      }
-    });
-    closeOrderModalBtn.addEventListener('click', () => {
-      orderModal.classList.remove('active');
-      document.getElementById('overlay').classList.remove('active');
-      document.body.classList.remove('no-scroll');
-    });
-    cancelOrderBtn.addEventListener('click', () => {
-      orderModal.classList.remove('active');
-      document.getElementById('overlay').classList.remove('active');
-      document.body.classList.remove('no-scroll');
-    });
-    confirmOrderBtn.addEventListener('click', async () => {
-      try {
-        // Mostrar mensaje de procesamiento
-        orderModal.classList.remove('active');
-        showMessage("Procesando pedido...", true);
-        
-        if (typeof window.realizarPedido === 'function') {
-          await window.realizarPedido();
-        } else {
-          console.log("Función realizarPedido no disponible. Simulando pedido...");
-          // Simular el pedido como respaldo
-          await new Promise(resolve => setTimeout(resolve, 1000));
-        }
-        
-        // Limpiar carrito y localStorage
-        cart = [];
-        try {
-          localStorage.removeItem('restaurantCart');
-        } catch (e) {
-          console.error("Error al limpiar carrito de localStorage:", e);
-        }
-        
-        updateCart();
-        closeMessage();
-        
-        orderModal.classList.remove('active');
-        cartPanel.classList.remove('open');
-        showMessage("✅ Pedido realizado con éxito. ¡Buen provecho!");
-      } catch (error) {
-        console.error("Error al guardar el pedido:", error);
-        closeMessage();
-        showMessage("❌ Error al guardar el pedido: " + error.message);
-      }
-    });
-    
-    // Modal de mensaje mejorada
-    const messageModal = document.getElementById('messageModal');
-    const messageModalText = document.getElementById('messageModalText');
-    const closeMessageModal = document.getElementById('closeMessageModal');
-    const closeMessageModalBtn = document.getElementById('closeMessageModalBtn');
-    
-    function showMessage(message, isLoading = false) {
-      messageModalText.textContent = message;
-      messageModal.classList.add('active');
-      
-      // Añadir o quitar clase de carga
-      if (isLoading) {
-        messageModal.classList.add('loading');
-        document.getElementById('closeMessageModalBtn').style.display = 'none';
-      } else {
-        messageModal.classList.remove('loading');
-        document.getElementById('closeMessageModalBtn').style.display = 'block';
-      }
-      
-      document.getElementById('overlay').classList.add('active');
-      document.body.classList.add('no-scroll');
-    }
-    
-    function closeMessage() {
-      messageModal.classList.remove('active');
-      messageModal.classList.remove('loading');
-      document.getElementById('overlay').classList.remove('active');
-      document.body.classList.remove('no-scroll');
-    }
-    
-    closeMessageModal.addEventListener('click', closeMessage);
-    closeMessageModalBtn.addEventListener('click', closeMessage);
-    document.getElementById('overlay').addEventListener('click', () => {
-      const productModal = document.getElementById('productModal');
-      if(productModal.classList.contains('active')) { closeModal(); }
-      if(cartPanel.classList.contains('open')) { 
-        cartPanel.classList.remove('open');
-        document.getElementById('overlay').classList.remove('active');
-        document.body.classList.remove('no-scroll');
-      }
-      if(orderModal.classList.contains('active')) { 
-        orderModal.classList.remove('active');
-        document.getElementById('overlay').classList.remove('active');
-        document.body.classList.remove('no-scroll');
-      }
-      if(messageModal.classList.contains('active')) { closeMessage(); }
-    });
-    
-    // Vincular eventos de botones
-    document.getElementById('closeModal').addEventListener('click', closeModal);
-    document.getElementById('addToCartBtn').addEventListener('click', addProductToCart);
-    document.getElementById('cancelModal').addEventListener('click', closeModal);
-    
-    // Declaración del array para el carrito
-    let cart = [];
-    
-    // Recuperar carrito guardado si existe
+    // Limpiar carrito y localStorage
+    cart = [];
     try {
-      const savedCart = localStorage.getItem('restaurantCart');
-      if (savedCart) {
-        cart = JSON.parse(savedCart);
-        console.log("Carrito recuperado de localStorage:", cart.length, "items");
+      localStorage.removeItem('restaurantCart');
+    } catch (e) {
+      console.error("Error al limpiar carrito de localStorage:", e);
+    }
+    
+    updateCart();
+    closeMessage();
+    
+    orderModal.classList.remove('active');
+    cartPanel.classList.remove('open');
+    showMessage("✅ Pedido realizado con éxito. ¡Buen provecho!");
+    
+    // Restaurar botón
+    confirmOrderBtn.innerHTML = '<i class="fas fa-check"></i> Confirmar';
+    confirmOrderBtn.disabled = false;
+  } catch (error) {
+    console.error("Error al guardar el pedido:", error);
+    closeMessage();
+    showMessage("❌ Error al guardar el pedido: " + error.message);
+    
+    // Restaurar botón
+    confirmOrderBtn.innerHTML = '<i class="fas fa-check"></i> Confirmar';
+    confirmOrderBtn.disabled = false;
+  }
+});
+
+// Modal de mensaje mejorada con animación
+const messageModal = document.getElementById('messageModal');
+const messageModalText = document.getElementById('messageModalText');
+const closeMessageModal = document.getElementById('closeMessageModal');
+const closeMessageModalBtn = document.getElementById('closeMessageModalBtn');
+
+function showMessage(message, isLoading = false) {
+  messageModalText.textContent = message;
+  
+  // Cambia el icono según el tipo de mensaje
+  const iconElement = document.querySelector('.modal-icon i');
+  if (iconElement) {
+    iconElement.className = 'fas';
+    
+    if (message.includes("éxito")) {
+      iconElement.classList.add('fa-check-circle');
+      iconElement.style.color = 'var(--secondary-color)';
+    } else if (message.includes("Error")) {
+      iconElement.classList.add('fa-exclamation-circle');
+      iconElement.style.color = 'var(--primary-color)';
+    } else if (message.includes("vacío") || message.includes("Sin conexión")) {
+      iconElement.classList.add('fa-exclamation-triangle');
+      iconElement.style.color = 'var(--accent-color)';
+    } else {
+      iconElement.classList.add('fa-info-circle');
+      iconElement.style.color = 'var(--primary-color)';
+    }
+  }
+  
+  messageModal.classList.add('active');
+  
+  // Añadir o quitar clase de carga
+  if (isLoading) {
+    messageModal.classList.add('loading');
+    document.getElementById('closeMessageModalBtn').style.display = 'none';
+  } else {
+    messageModal.classList.remove('loading');
+    document.getElementById('closeMessageModalBtn').style.display = 'block';
+  }
+  
+  document.getElementById('overlay').classList.add('active');
+  document.body.classList.add('no-scroll');
+}
+
+function closeMessage() {
+  messageModal.classList.remove('active');
+  messageModal.classList.remove('loading');
+  setTimeout(() => {
+    document.getElementById('overlay').classList.remove('active');
+    document.body.classList.remove('no-scroll');
+  }, 300);
+}
+
+closeMessageModal.addEventListener('click', closeMessage);
+closeMessageModalBtn.addEventListener('click', closeMessage);
+document.getElementById('overlay').addEventListener('click', () => {
+  const productModal = document.getElementById('productModal');
+  if(productModal.classList.contains('active')) { closeModal(); }
+  if(cartPanel.classList.contains('open')) { 
+    cartPanel.classList.remove('open');
+    setTimeout(() => {
+      document.getElementById('overlay').classList.remove('active');
+      document.body.classList.remove('no-scroll');
+    }, 300);
+  }
+  if(orderModal.classList.contains('active')) { 
+    orderModal.classList.remove('active');
+    setTimeout(() => {
+      document.getElementById('overlay').classList.remove('active');
+      document.body.classList.remove('no-scroll');
+    }, 300);
+  }
+  if(messageModal.classList.contains('active')) { closeMessage(); }
+});
+
+// Función para cerrar modal de producto con animación
+function closeModal() {
+  const productModal = document.getElementById('productModal');
+  productModal.classList.remove('active');
+  setTimeout(() => {
+    document.getElementById('overlay').classList.remove('active');
+    document.body.classList.remove('no-scroll');
+    selectedProduct = null;
+    let menuOptionsDiv = document.getElementById('menuOptions');
+    if(menuOptionsDiv) menuOptionsDiv.remove();
+  }, 300);
+}
+
+// Vincular eventos de botones
+document.getElementById('closeModal').addEventListener('click', closeModal);
+document.getElementById('addToCartBtn').addEventListener('click', addProductToCart);
+document.getElementById('cancelModal').addEventListener('click', closeModal);
+
+// Declaración del array para el carrito
+let cart = [];
+
+// Recuperar carrito guardado si existe
+try {
+  const savedCart = localStorage.getItem('restaurantCart');
+  if (savedCart) {
+    cart = JSON.parse(savedCart);
+    console.log("Carrito recuperado de localStorage:", cart.length, "items");
+  }
+} catch (e) {
+  console.error("Error al recuperar carrito guardado:", e);
+}
+
+// Detector de conexión a internet
+window.addEventListener('load', function() {
+  function updateOnlineStatus() {
+    if (navigator.onLine) {
+      console.log("🟢 Aplicación online");
+      document.body.classList.remove('offline-mode');
+      // Intentar sincronizar pedidos pendientes si estamos online
+      syncPendingOrders();
+    } else {
+      console.log("🔴 Aplicación offline");
+      document.body.classList.add('offline-mode');
+      showMessage("⚠️ Sin conexión a internet. La aplicación funcionará en modo offline.");
+    }
+  }
+
+  window.addEventListener('online', updateOnlineStatus);
+  window.addEventListener('offline', updateOnlineStatus);
+  updateOnlineStatus();
+  
+  // Función para sincronizar pedidos pendientes
+  async function syncPendingOrders() {
+    if (!navigator.onLine) return;
+    
+    try {
+      const pendingOrders = JSON.parse(localStorage.getItem('orders') || '[]');
+      const pendingToSync = pendingOrders.filter(order => order.pendingSyncToFirebase);
+      
+      if (pendingToSync.length === 0) return;
+      
+      console.log(`Intentando sincronizar ${pendingToSync.length} pedidos pendientes`);
+      
+      // Importar función de Firebase solo si estamos online
+      try {
+        const { guardarPedido } = await import('./app.js');
+        
+        // Sincronizar cada pedido
+        for (const order of pendingToSync) {
+          try {
+            await guardarPedido(order);
+            // Marcar como sincronizado
+            order.pendingSyncToFirebase = false;
+            order.syncedToFirebase = true;
+            order.syncTime = new Date().toISOString();
+          } catch (e) {
+            console.error("Error al sincronizar pedido:", e);
+          }
+        }
+        
+        // Actualizar localStorage con los cambios
+        localStorage.setItem('orders', JSON.stringify(pendingOrders));
+        
+        // Notificar si se sincronizaron pedidos
+        const syncedCount = pendingToSync.filter(order => order.syncedToFirebase).length;
+        if (syncedCount > 0) {
+          console.log(`✅ ${syncedCount} pedidos sincronizados con Firebase`);
+        }
+      } catch (e) {
+        console.warn("No se pudo cargar módulo Firebase para sincronización:", e);
       }
     } catch (e) {
-      console.error("Error al recuperar carrito guardado:", e);
+      console.error("Error en proceso de sincronización:", e);
     }
-    
-    // Detector de conexión a internet
-    window.addEventListener('load', function() {
-      function updateOnlineStatus() {
-        if (navigator.onLine) {
-          console.log("🟢 Aplicación online");
-          document.body.classList.remove('offline-mode');
-          // Intentar sincronizar pedidos pendientes si estamos online
-          syncPendingOrders();
-        } else {
-          console.log("🔴 Aplicación offline");
-          document.body.classList.add('offline-mode');
-          showMessage("⚠️ Sin conexión a internet. La aplicación funcionará en modo offline.");
-        }
-      }
+  }
+});
 
-      window.addEventListener('online', updateOnlineStatus);
-      window.addEventListener('offline', updateOnlineStatus);
-      updateOnlineStatus();
-      
-      // Función para sincronizar pedidos pendientes
-      async function syncPendingOrders() {
-        if (!navigator.onLine) return;
-        
-        try {
-          const pendingOrders = JSON.parse(localStorage.getItem('orders') || '[]');
-          const pendingToSync = pendingOrders.filter(order => order.pendingSyncToFirebase);
-          
-          if (pendingToSync.length === 0) return;
-          
-          console.log(`Intentando sincronizar ${pendingToSync.length} pedidos pendientes`);
-          
-          // Importar función de Firebase solo si estamos online
-          try {
-            const { guardarPedido } = await import('./app.js');
-            
-            // Sincronizar cada pedido
-            for (const order of pendingToSync) {
-              try {
-                await guardarPedido(order);
-                // Marcar como sincronizado
-                order.pendingSyncToFirebase = false;
-                order.syncedToFirebase = true;
-                order.syncTime = new Date().toISOString();
-              } catch (e) {
-                console.error("Error al sincronizar pedido:", e);
-              }
-            }
-            
-            // Actualizar localStorage con los cambios
-            localStorage.setItem('orders', JSON.stringify(pendingOrders));
-            
-            // Notificar si se sincronizaron pedidos
-            const syncedCount = pendingToSync.filter(order => order.syncedToFirebase).length;
-            if (syncedCount > 0) {
-              console.log(`✅ ${syncedCount} pedidos sincronizados con Firebase`);
-            }
-          } catch (e) {
-            console.warn("No se pudo cargar módulo Firebase para sincronización:", e);
-          }
-        } catch (e) {
-          console.error("Error en proceso de sincronización:", e);
-        }
-      }
-    });
-    
-    // Inicializar la carga de productos y actualizar UI
-    loadProductsFromSheet();
-    updateCart(); // Para mostrar carrito recuperado de localStorage
+// Inicializar la carga de productos y actualizar UI
+loadProductsFromSheet();
+updateCart(); // Para mostrar carrito recuperado de localStorage
+
   </script>
   
   <!-- Bloque separado para la integración con Firebase usando módulos -->
@@ -2070,4 +2203,3 @@
   </script>
 </body>
 </html>
-  
