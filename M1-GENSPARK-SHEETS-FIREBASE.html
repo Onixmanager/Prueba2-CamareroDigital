@@ -1,0 +1,2073 @@
+  <!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MESA 1</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.js"></script>
+  <!-- Font Awesome para iconos -->
+  <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Animate.css para animaciones -->
+  <link href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css" rel="stylesheet">
+ <style>
+    :root {
+      --primary-color: #D2B48C;
+      --secondary-color: #D4AF37;
+      --accent-color: #C5A880;
+      --dark-color: #2C3E50;
+      --light-color: #F8F9FA;
+      --bg-color: #F7F8FB;
+      --text-color: #484848;
+      --shadow-light: 0 4px 6px rgba(0, 0, 0, 0.05);
+      --shadow-medium: 0 8px 15px rgba(0, 0, 0, 0.1);
+      --shadow-dark: 0 10px 25px rgba(0, 0, 0, 0.15);
+      --border-radius: 12px;
+      --transition: all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+    
+    body { 
+      background-color: #D2B48C;
+      color: var(--text-color);
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+    
+    a { 
+      text-decoration: none; 
+      color: inherit; 
+    }
+    
+    /* Header moderno con glassmorphism */
+    header {
+      height: 70px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 1.2rem;
+      background: #FAF0E6;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: var(--shadow-light);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      transition: var(--transition);
+    }
+    
+    .header-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      background: linear-gradient(45deg, var(--text-color), var(--text-color));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .cart-btn {
+      position: relative;
+      background: none;
+      border: none;
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--dark-color);
+      transition: var(--transition);
+      background: rgba(255, 255, 255, 0.8);
+      box-shadow: var(--shadow-light);
+    }
+    
+    .cart-btn:hover {
+      transform: scale(1.08);
+      box-shadow: var(--shadow-medium);
+      background: rgba(255, 255, 255, 0.95);
+      color: var(--primary-color);
+    }
+    
+    .cart-count {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background: var(--primary-color);
+      color: white;
+      border-radius: 50%;
+      width: 22px;
+      height: 22px;
+      font-size: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(255, 90, 95, 0.7);
+      }
+      70% {
+        transform: scale(1.05);
+        box-shadow: 0 0 0 10px rgba(255, 90, 95, 0);
+      }
+      100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(255, 90, 95, 0);
+      }
+    }
+    
+    /* Menús de Categorías y Subcategorías con efecto de deslizamiento */
+    #categoryMenu, #subCategoryMenu {
+      background-color: transparent;
+      padding: 0.6rem 0.8rem;
+      margin: 0.8rem 0.6rem;
+      display: flex;
+      overflow-x: auto;
+      gap: 12px;
+      transition: var(--transition);
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      position: relative;
+    }
+    
+    #categoryMenu:after, #subCategoryMenu:after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 0;
+      height: 100%;
+      width: 40px;
+      
+      pointer-events: none;
+    }
+    
+    #subCategoryMenu {
+      margin-top: 0;
+      margin-bottom: 1rem;
+      padding-top: 0.2rem;
+    }
+    
+    /* Estilo para botones en menús con neomorfismo */
+    #categoryMenu button,
+#subCategoryMenu button {
+  padding: 0.7rem 1.2rem;
+  background: #FAF0E6;
+  color: var(--text-color);
+  border: none;
+  border-radius: 30px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  
+  transition: var(--transition);
+  white-space: nowrap;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  
+  /* Sombra más fuerte para el efecto 3D */
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2), 0 4px 6px rgba(0, 0, 0, 0.1);
+  transform: translateY(-4px); /* Aumento de la elevación */
+}
+    
+    /* Icono para botones de categoría */
+    #categoryMenu button::before {
+      font-family: "Font Awesome 5 Free";
+      font-weight: 900;
+      font-size: 0.85rem;
+    }
+    
+    #categoryMenu button:nth-child(1)::before { content: "\f805"; } /* Utensil Spoon */
+    #categoryMenu button:nth-child(2)::before { content: "\f57b"; } /* Glass Martini Alt */
+    #categoryMenu button:nth-child(3)::before { content: "\f810"; } /* Cake */
+    #categoryMenu button:nth-child(4)::before { content: "\f7ef"; } /* Bread Slice */
+    #categoryMenu button:nth-child(5)::before { content: "\f81e"; } /* Pasta */
+    #categoryMenu button:nth-child(6)::before { content: "\f7e5"; } /* Hamburger */
+    #categoryMenu button:nth-child(7)::before { content: "\f7ed"; } /* Bowl Food */
+    #categoryMenu button:nth-child(8)::before { content: "\f0f4"; } /* Coffee */
+    
+    #subCategoryMenu button {
+      font-size: 0.85rem;
+      padding: 0.6rem 1rem;
+        /* Sombra más fuerte para el efecto 3D */
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2), 0 4px 6px rgba(0, 0, 0, 0.1);
+  transform: translateY(-4px); /* Aumento de la elevación */
+    }
+    
+    /* Efectos de hover y estado activo */
+    #categoryMenu button:hover,
+    #subCategoryMenu button:hover {
+      transform: translateY(-3px);
+      box-shadow: 7px 7px 15px rgba(163, 177, 198, 0.6), 
+                 -7px -7px 15px rgba(255, 255, 255, 1);
+    }
+    
+    #categoryMenu button.active,
+    #subCategoryMenu button.active {
+      background: linear-gradient(145deg, var(--primary-color), var(--accent-color));
+      color: white;
+      box-shadow: inset 3px 3px 6px rgba(0, 0, 0, 0.2), 
+                  inset -2px -2px 5px rgba(255, 255, 255, 0.1);
+      transform: translateY(0px);
+    }
+    
+    #categoryMenu::-webkit-scrollbar,
+    #subCategoryMenu::-webkit-scrollbar {
+      display: none;
+    }
+    
+    /* Main: Contenedor de productos con animación de entrada */
+    main {
+      padding: 0 1rem 5rem;
+    }
+    
+    /* Grid de productos con animación de entrada */
+    .product-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 1.2rem;
+      margin-top: 1rem;
+    }
+    
+    /* Tarjeta de producto con glassmorphism */
+    .product-card {
+      background: #FAF0E6;
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow-light);
+      overflow: hidden;
+      cursor: pointer;
+      transition: var(--transition);
+      position: relative;
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      animation: fadeIn 0.5s ease-out;
+      transform-origin: center;
+      will-change: transform;
+    }
+    
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.98);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+    
+    .product-card:hover { 
+      transform: translateY(-10px) scale(1.02);
+      box-shadow: var(--shadow-dark);
+    }
+    
+    .product-card img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      transition: var(--transition);
+      filter: brightness(1.05) contrast(1.05);
+    }
+    
+    .product-card:hover img {
+      transform: scale(1.05);
+      filter: brightness(1.1) contrast(1.1);
+    }
+    
+    .card-body {
+      padding: 1.2rem;
+      position: relative;
+    }
+    
+    .card-body h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--dark-color);
+    }
+    
+    .card-body p {
+      font-size: 0.85rem;
+      margin-bottom: 0.7rem;
+      color: #666;
+      line-height: 1.4;
+    }
+    
+    .price {
+      font-weight: 700;
+      background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-size: 1.25rem !important;
+      display: inline-block;
+      position: relative;
+      padding-right: 12px;
+    }
+    
+    .price::after {
+      content: "€";
+      position: absolute;
+      right: 0;
+      top: 0;
+    }
+    
+    /* Indicador de categoría en la tarjeta */
+    .card-category {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(0, 0, 0, 0.6);
+      color: white;
+      font-size: 0.7rem;
+      padding: 3px 8px;
+      border-radius: 30px;
+      backdrop-filter: blur(4px);
+      z-index: 1;
+    }
+    
+    /* Animación "agregar al carrito" */
+    .add-to-cart-indicator {
+      position: absolute;
+      bottom: 15px;
+      right: 15px;
+      background: var(--primary-color);
+      color: white;
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      opacity: 0;
+      transform: scale(0.5);
+      transition: var(--transition);
+    }
+    
+    .product-card:hover .add-to-cart-indicator {
+      opacity: 1;
+      transform: scale(1);
+    }
+    
+    /* Modal con animaciones y glassmorphism */
+    .modal {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(5px);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      padding: 1rem;
+      z-index: 1001;
+      transition: var(--transition);
+      opacity: 0;
+    }
+    
+    .modal.active { 
+      display: flex; 
+      opacity: 1;
+      animation: modalFadeIn 0.3s forwards;
+    }
+    
+    @keyframes modalFadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    .modal-content {
+      background: #F5E9DA;
+      border-radius: var(--border-radius);
+      width: 100%;
+      max-width: 450px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: var(--shadow-dark);
+      transform: scale(0.95);
+      opacity: 0;
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    
+    .modal.active .modal-content {
+      transform: scale(1);
+      opacity: 1;
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.2rem;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+    }
+    
+    .modal-header button {
+      background: none;
+      border: none;
+      color: #999;
+      font-size: 1.6rem;
+      cursor: pointer;
+      transition: var(--transition);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .modal-header button:hover {
+      background: rgba(0,0,0,0.05);
+      color: var(--primary-color);
+      transform: rotate(90deg);
+    }
+    
+    .modal-body {
+      padding: 1.5rem;
+      text-align: center;
+    }
+    
+    .modal-body img {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      border-radius: var(--border-radius);
+      margin-bottom: 1.2rem;
+      box-shadow: var(--shadow-light);
+    }
+    
+    .modal-body label {
+      font-size: 0.9rem;
+      margin-top: 1rem;
+      display: block;
+      text-align: left;
+      color: #666;
+      font-weight: 500;
+    }
+    
+    .modal-footer {
+      padding: 1rem 1.5rem;
+      text-align: center;
+      border-top: 1px solid rgba(0,0,0,0.06);
+      display: flex;
+      gap: 10px;
+    }
+    
+    .btn {
+      padding: 0.8rem 1.2rem;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    
+    .btn.primary { 
+      background: linear-gradient(145deg, var(--primary-color), var(--accent-color));
+      color: white;
+      box-shadow: 0 4px 10px rgba(210, 180, 140, 0.3); /* Beige dorado */
+    }
+    
+    .btn.primary:hover { 
+      transform: translateY(-3px);
+      box-shadow: 0 7px 15px rgba(210, 180, 140, 0.4); /* Beige dorado */
+    }
+    
+    .btn.primary:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 6px rgba(210, 180, 140, 0.3); /* Beige dorado */
+    }
+    
+    .btn.secondary { 
+      background: #f5f5f5;
+      color: #666;
+    }
+    
+    .btn.secondary:hover { 
+      background: #eaeaea;
+    }
+    
+    #addToCartBtn {
+      width: 100%;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    #addToCartBtn::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 5px;
+      height: 5px;
+      background: rgba(255, 255, 255, 0.7);
+      opacity: 0;
+      border-radius: 100%;
+      transform: scale(1, 1) translate(-50%);
+      transform-origin: 50% 50%;
+    }
+    
+    @keyframes ripple {
+      0% {
+        transform: scale(0, 0);
+        opacity: 0.5;
+      }
+      100% {
+        transform: scale(200, 200);
+        opacity: 0;
+      }
+    }
+    
+    #addToCartBtn:focus:not(:active)::after {
+      animation: ripple 1s ease-out;
+    }
+    
+    /* Selector de cantidad modernizado */
+    #quantitySelector {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 15px 0;
+    }
+    
+    #quantitySelector button {
+      border-radius: 50%;
+      background: var(--light-color);
+      color: var(--dark-color);
+      width: 40px;
+      height: 40px;
+      font-size: 1.2rem;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: 4px 4px 8px rgba(163, 177, 198, 0.5), 
+                 -4px -4px 8px rgba(255, 255, 255, 0.9);
+    }
+    
+    #quantitySelector button:hover {
+      transform: scale(1.1);
+      background: #f0f0f0;
+      color: var(--primary-color);
+    }
+    
+    #quantitySelector button:active {
+      box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.15), 
+                  inset -2px -2px 5px rgba(255, 255, 255, 0.7);
+      transform: scale(0.95);
+    }
+    
+    #quantitySelector span {
+      font-size: 1.3rem;
+      color: var(--dark-color);
+      min-width: 40px;
+      display: inline-block;
+      text-align: center;
+      font-weight: 600;
+    }
+    
+    /* Panel lateral del carrito modernizado */
+    .cart-panel {
+      position: fixed;
+      top: 0;
+      right: -400px;
+      width: 350px;
+      height: 100%;
+      background: white;
+      box-shadow: -5px 0 25px rgba(0,0,0,0.15);
+      transition: all 0.45s cubic-bezier(0.25, 1, 0.5, 1);
+      z-index: 1000;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      padding: 0;
+    }
+    
+    .cart-panel.open { 
+      right: 0;
+    }
+    
+    .cart-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid #f0f0f0;
+      position: relative;
+    }
+    
+    .cart-panel h2 {
+      font-size: 1.4rem;
+      color: var(--dark-color);
+      text-align: left;
+      font-weight: 600;
+    }
+    
+    .cart-items-container {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding: 1rem;
+    }
+    
+    .cart-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #f0f0f0;
+      animation: slideInRight 0.3s both;
+    }
+    
+    @keyframes slideInRight {
+      from {
+        transform: translateX(20px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    
+    .cart-item .item-info {
+      flex: 1;
+      font-size: 0.95rem;
+      text-align: left;
+      font-weight: 500;
+      color: var(--dark-color);
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .item-info .item-name {
+      font-weight: 600;
+      margin-bottom: 3px;
+    }
+    
+    .item-info .item-note {
+      font-size: 0.75rem;
+      color: #777;
+      font-style: italic;
+    }
+    
+    .cart-item .item-price {
+      font-size: 1rem;
+      text-align: right;
+      margin-right: 8px;
+      font-weight: 600;
+      color: var(--primary-color);
+    }
+    
+    .delete-item-btn {
+      background: rgba(245, 245, 245, 0.8);
+      border: none;
+      cursor: pointer;
+      color: #777;
+      transition: var(--transition);
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .delete-item-btn:hover {
+      transform: scale(1.1) rotate(10deg);
+      background: #ffeeee;
+      color: var(--primary-color);
+    }
+    
+    .cart-checkout-section {
+      background-color: #f9f9f9;
+      padding: 1.5rem;
+      margin-top: auto;
+      box-shadow: 0 -5px 10px rgba(0,0,0,0.03);
+      border-top: 1px solid #f0f0f0;
+    }
+    
+    .cart-total {
+      font-weight: 600;
+      margin-bottom: 1.2rem;
+      font-size: 1.15rem;
+      display: flex;
+      justify-content: space-between;
+      color: var(--dark-color);
+    }
+    
+    #cartTotal {
+      font-weight: 700;
+      color: var(--primary-color);
+      position: relative;
+    }
+    
+    #cartTotal::after {
+      content: "€";
+      position: relative;
+      right: -3px;
+    }
+    
+    .close-cart-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(245, 245, 245, 0.8);
+      border: none;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #777;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .close-cart-btn:hover { 
+      transform: rotate(90deg);
+      background: #f2f2f2;
+      color: var(--primary-color);
+    }
+    
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(3px);
+      z-index: 999;
+      display: none;
+      transition: var(--transition);
+      opacity: 0;
+    }
+    
+    .overlay.active { 
+      display: block; 
+      animation: fadeIn 0.3s forwards;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    .no-scroll { 
+      overflow: hidden; 
+    }
+    
+    /* Estilos para textarea y etiquetas de nota */
+    #modalNote {
+      width: 100%;
+      padding: 12px 15px;
+      border: 2px solid #eaeaea;
+      border-radius: 12px;
+      resize: vertical;
+      min-height: 90px;
+      font-family: inherit;
+      margin-top: 10px;
+      transition: var(--transition);
+      font-size: 0.95rem;
+      background: #f9f9f9;
+    }
+    
+    #modalNote:focus {
+      outline: none;
+      border-color: var(--secondary-color);
+      box-shadow: 0 0 0 3px rgba(0, 166, 153, 0.15);
+      background: white;
+    }
+    
+    #lblNota {
+      font-weight: 600;
+      color: var(--dark-color);
+      margin-top: 15px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    /* Estilos específicos para menús */
+    .menu-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .menu-section {
+      background: #f9f9f9;
+      border-radius: 15px;
+      padding: 15px;
+      box-shadow: var(--shadow-light);
+      transition: var(--transition);
+    }
+    
+    .menu-section:hover {
+      box-shadow: var(--shadow-medium);
+      transform: translateY(-5px);
+    }
+    
+    .menu-section p {
+      color: var(--dark-color);
+      font-weight: 600;
+      font-size: 1.05rem;
+      margin-bottom: 15px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--secondary-color);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .menu-option {
+      display: flex;
+      align-items: center;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 8px;
+      transition: var(--transition);
+      background: white;
+      box-shadow: var(--shadow-light);
+    }
+    
+    .menu-option:hover {
+      background: #f0f7f7;
+      transform: translateX(5px);
+      box-shadow: var(--shadow-medium);
+    }
+    
+    .menu-option input {
+      margin-right: 12px;
+      accent-color: var(--secondary-color);
+      width: 18px;
+      height: 18px;
+    }
+    
+    .menu-notes p {
+      font-weight: 600;
+      color: var(--dark-color);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .menu-notes textarea {
+      width: 100%;
+      padding: 12px 15px;
+      border: 2px solid #eaeaea;
+      border-radius: 12px;
+      resize: vertical;
+      min-height: 80px;
+      font-family: inherit;
+      font-size: 0.95rem;
+      background: #f9f9f9;
+      transition: var(--transition);
+    }
+    
+    .menu-notes textarea:focus {
+      outline: none;
+      border-color: var(--secondary-color);
+      box-shadow: 0 0 0 3px rgba(0, 166, 153, 0.15);
+      background: white;
+    }
+    
+    /* Estado de carrito vacío */
+    .empty-cart {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 300px;
+      padding: 2rem;
+      text-align: center;
+      color: #999;
+    }
+    
+    .empty-cart i {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      opacity: 0.3;
+    }
+    
+    .empty-cart p {
+      font-size: 1.1rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    /* Diseño responsive mejorado */
+    @media (max-width: 768px) {
+      .product-list {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 12px;
+      }
+      
+      .product-card img {
+        height: 140px;
+      }
+      
+      .card-body h3 {
+        font-size: 1rem;
+      }
+      
+      .cart-panel {
+        width: 85vw;
+        right: -85vw;
+      }
+      
+      .header-title {
+        font-size: 1.1rem;
+      }
+      
+      #categoryMenu button,
+      #subCategoryMenu button {
+        padding: 0.6rem 1rem;
+        font-size: 0.8rem;
+      }
+      
+      .modal-content {
+        max-height: 92vh;
+        overflow-y: auto;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .product-list {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .card-body {
+        padding: 0.8rem;
+      }
+      
+      
+      
+      #quantitySelector button {
+        width: 35px;
+        height: 35px;
+      }
+      
+      .modal-body img {
+        height: 180px;
+      }
+      
+      .btn {
+        padding: 0.8rem 1rem;
+        font-size: 0.9rem;
+      }
+    }
+    
+    /* Animaciones para elementos interactivos */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    @keyframes scaleIn {
+      from {
+        opacity: 0;
+        transform: scale(0.5);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+    
+    /* Mejoras para mensajes */
+    #messageModal .modal-content {
+      max-width: 350px;
+    }
+    
+    #messageModalText {
+      padding: 1rem;
+      font-size: 1.1rem;
+      line-height: 1.5;
+    }
+    
+    .modal-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      color: var(--primary-color);
+      animation: scaleIn 0.5s ease-out;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header fijo con efecto de glassmorphism -->
+  <header>
+    <div class="header-title">Nombre Bar-Restaurante</div>
+    <button class="cart-btn" id="openCart">
+      <i class="fas fa-shopping-cart fa-lg"></i>
+      <span class="cart-count" id="cartCount" style="display:none;">0</span>
+    </button>
+  </header>
+  
+  <!-- Menú de Categorías con efecto de deslizamiento -->
+  <div id="categoryMenu">
+    <!-- Se generarán dinámicamente los botones de categoría -->
+  </div>
+  
+  <!-- Menú de Subcategorías -->
+  <div id="subCategoryMenu">
+    <!-- Se generarán dinámicamente los botones de subcategoría -->
+  </div>
+  
+  <!-- Contenido principal: listado de productos -->
+  <main>
+    <div class="product-list" id="productList">
+      <!-- Se generarán las tarjetas de productos -->
+    </div>
+  </main>
+  
+  <!-- Modal de Producto con animaciones -->
+  <div class="modal" id="productModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <p class="text-lg font-medium text-gray-800">Detalles del Producto</p>
+        <button id="closeModal"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <img id="modalImg" src="" alt="Imagen del producto">
+        <h2 id="modalTitle" class="text-2xl font-bold mb-1"></h2>
+        <p id="modalDesc" class="text-gray-600 mb-3"></p>
+        
+        <div class="bg-gray-50 rounded-lg p-3 mb-3 shadow-sm">
+          <p class="text-xl font-bold">
+            <span id="modalPrice"></span>
+          </p>
+        </div>
+        
+        <p id="pSubtotal" class="text-sm text-gray-600 my-2">Subtotal: <span id="modalSubtotal"></span> €</p>
+        
+        <label id="lblCantidad" class="mt-4 mb-1 block text-left">Cantidad:</label>
+        <div id="quantitySelector">
+          <button id="decreaseQty"><i class="fas fa-minus"></i></button>
+          <span id="modalQty">1</span>
+          <button id="increaseQty"><i class="fas fa-plus"></i></button>
+        </div>
+        
+        <label for="modalNote" id="lblNota"><i class="fas fa-pencil-alt"></i> Nota Personal:</label>
+        <textarea id="modalNote" placeholder="Ej: Sin cebolla, sin gluten, preferencias de cocción..."></textarea>
+      </div>
+      <div class="modal-footer">
+        <button class="btn secondary" id="cancelModal"><i class="fas fa-arrow-left"></i> Cancelar</button>
+        <button class="btn primary" id="addToCartBtn"><i class="fas fa-cart-plus"></i> Agregar al carrito</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Panel del carrito con efectos de deslizamiento -->
+  <div class="cart-panel" id="cartPanel">
+    <div class="cart-header">
+      <h2><i class="fas fa-shopping-bag mr-2"></i> Tu Pedido</h2>
+      <button class="close-cart-btn" id="closeCartPanel"><i class="fas fa-times"></i></button>
+    </div>
+    
+    <div class="cart-items-container" id="cartItemsContainer">
+      <div id="cartItems">
+        <!-- Aquí se generarán los productos añadidos -->
+      </div>
+    </div>
+    
+    <div class="cart-checkout-section">
+      <p class="cart-total">
+        <span>Total:</span>
+        <span id="cartTotal">0.00</span>
+      </p>
+      <button class="btn primary" id="checkoutBtn"><i class="fas fa-check-circle"></i> Realizar Pedido</button>
+    </div>
+  </div>
+  
+  <!-- Modal de Confirmación de Pedido -->
+  <div class="modal" id="orderModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <p class="text-lg font-medium text-gray-800">Confirmar Pedido</p>
+        <button id="closeOrderModal"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-icon">
+          <i class="fas fa-receipt"></i>
+        </div>
+        <p class="text-lg">¿Confirmas el pedido por un total de <span id="orderTotal" class="font-bold text-primary"></span> €?</p>
+      </div>
+      <div class="modal-footer">
+     <button class="btn secondary" id="cancelOrder"><i class="fas fa-times"></i> Cancelar</button>
+        <button class="btn primary" id="confirmOrder"><i class="fas fa-check"></i> Confirmar</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Modal de Mensaje -->
+  <div class="modal" id="messageModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <p id="messageModalTitle" class="text-lg font-medium text-gray-800">Mensaje</p>
+        <button id="closeMessageModal"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-icon">
+          <i class="fas fa-info-circle"></i>
+        </div>
+        <p id="messageModalText"></p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn primary" id="closeMessageModalBtn">Aceptar</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Capa Overlay con efecto blur -->
+  <div id="overlay" class="overlay"></div>
+  
+    <script>
+    /***** INICIO: CARGA DINÁMICA DESDE GOOGLE SHEETS *****/
+    // Declaro variables globales para productos y categorías
+    let products = [];
+    let categoryData = {};
+
+    // Usamos tu ID real de Google Sheets
+    const SHEET_ID = '16T4nUgdleXWzb2jC1_G-gukCUrTgDTXr4vKZmW_5AYw';
+    
+    // URL de la hoja utilizando la API de Google Sheets con formato JSON
+    const sheetUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json`;
+
+    async function loadProductsFromSheet() {
+      try {
+        // Mostrar mensaje de carga con spinner
+        showMessage("Cargando productos...", true);
+        
+        // Intentar cargar desde localStorage primero para mejorar experiencia
+        const cachedProducts = localStorage.getItem('cachedProducts');
+        const cacheTimestamp = localStorage.getItem('cacheTimestamp');
+        const cacheExpiry = 30 * 60 * 1000; // 30 minutos en milisegundos
+        
+        // Si hay datos en caché y no han expirado, usarlos temporalmente mientras se cargan los nuevos
+        if (cachedProducts && cacheTimestamp && (Date.now() - parseInt(cacheTimestamp)) < cacheExpiry) {
+          try {
+            const cached = JSON.parse(cachedProducts);
+            if (cached.products && cached.products.length > 0 && cached.categoryData) {
+              console.log("Usando datos en caché mientras se actualiza desde el servidor");
+              products = cached.products;
+              categoryData = cached.categoryData;
+              renderCategoryMenu();
+              renderProducts();
+            }
+          } catch (e) {
+            console.error("Error al procesar caché:", e);
+          }
+        }
+        
+        const response = await fetch(sheetUrl);
+        
+        if (!response.ok) {
+          throw new Error(`Error de red: ${response.status}`);
+        }
+        
+        const text = await response.text();
+        
+        // Google Sheets envuelve el JSON en una función de callback, necesitamos extraer solo el JSON
+        // La respuesta típica es: google.visualization.Query.setResponse({json});
+        let jsonText;
+        try {
+          // Extraer el JSON de la respuesta
+          jsonText = text.match(/google\.visualization\.Query\.setResponse\(([\s\S\w]+)\);?/);
+          if (!jsonText || !jsonText[1]) {
+            throw new Error("No se pudo extraer el JSON de la respuesta");
+          }
+          jsonText = jsonText[1];
+        } catch (e) {
+          console.error("Error al procesar la respuesta:", e);
+          // Intento alternativo: extraer todo lo que está entre los primeros paréntesis
+          const startPos = text.indexOf('(');
+          const endPos = text.lastIndexOf(')');
+          if (startPos !== -1 && endPos !== -1 && startPos < endPos) {
+            jsonText = text.substring(startPos + 1, endPos);
+          } else {
+            throw new Error("Formato de respuesta no reconocido");
+          }
+        }
+
+        const jsonData = JSON.parse(jsonText);
+
+        // Verificar si la estructura del JSON es la esperada
+        if (!jsonData.table || !jsonData.table.rows) {
+          throw new Error("Estructura de datos inesperada en la respuesta");
+        }
+
+        // Itera sobre las filas y construye el array de productos.
+        products = jsonData.table.rows.map(row => {
+          // Cada fila tiene c: array de celdas
+          // Se asume que las columnas son: id, name, description, price, image, category, subcategory, menuOptions (opcional)
+          const cells = row.c || [];
+          const prod = {
+            id: cells[0] && cells[0].v ? cells[0].v : "",
+            name: cells[1] && cells[1].v ? cells[1].v : "",
+            description: cells[2] && cells[2].v ? cells[2].v : "",
+            price: cells[3] && cells[3].v ? parseFloat(cells[3].v) : 0,
+            image: cells[4] && cells[4].v ? cells[4].v : "",
+            category: cells[5] && cells[5].v ? cells[5].v : "",
+            subcategory: cells[6] && cells[6].v ? cells[6].v : ""
+          };
+          
+          // Si existe el campo menuOptions, intenta parsearlo (para productos de tipo Menu)
+          if (cells[7] && cells[7].v) {
+            try {
+              prod.menuOptions = JSON.parse(cells[7].v);
+            } catch (e) {
+              console.error("Error al parsear menuOptions en el producto " + prod.id, e);
+              prod.menuOptions = null;
+            }
+          }
+          return prod;
+        });
+
+        // Filtrar productos sin datos válidos
+        products = products.filter(prod => prod.id && prod.name);
+
+        // Construye el objeto categoryData a partir de los productos obtenidos
+        categoryData = {};
+        products.forEach(prod => {
+          if (prod.category) {
+            if (!categoryData[prod.category]) {
+              categoryData[prod.category] = [];
+            }
+            if (prod.subcategory && prod.subcategory.trim() !== "" && !categoryData[prod.category].includes(prod.subcategory)) {
+              categoryData[prod.category].push(prod.subcategory);
+            }
+          }
+        });
+
+        // Una vez cargados los datos, renderiza menús y productos
+        renderCategoryMenu();
+        renderProducts();
+        
+        // Guardar en caché para futuras cargas rápidas
+        try {
+          localStorage.setItem('cachedProducts', JSON.stringify({
+            products,
+            categoryData
+          }));
+          localStorage.setItem('cacheTimestamp', Date.now().toString());
+        } catch (e) {
+          console.warn("No se pudo guardar caché de productos:", e);
+        }
+        
+        // Cerrar el mensaje de carga
+        closeMessage();
+        
+        console.log("Productos cargados exitosamente:", products.length);
+        console.log("Categorías encontradas:", Object.keys(categoryData).length);
+      } catch (error) {
+        console.error("Error al cargar productos desde Google Sheets:", error);
+        
+        // Si hay error en la carga, intentar usar datos en caché incluso si expiraron
+        const cachedProducts = localStorage.getItem('cachedProducts');
+        if (cachedProducts) {
+          try {
+            console.warn("Usando datos en caché debido a error en la carga");
+            const cached = JSON.parse(cachedProducts);
+            if (cached.products && cached.products.length > 0 && cached.categoryData) {
+              products = cached.products;
+              categoryData = cached.categoryData;
+              renderCategoryMenu();
+              renderProducts();
+              closeMessage();
+              showMessage("⚠️ Usando menú almacenado localmente. Algunos precios podrían no estar actualizados.");
+              return;
+            }
+          } catch (e) {
+            console.error("Error al procesar caché de respaldo:", e);
+          }
+        }
+        
+        showMessage("Error al cargar productos: " + error.message);
+      }
+    }
+    /***** FIN: CARGA DINÁMICA DESDE GOOGLE SHEETS *****/
+
+    /***** EL RESTO DEL CÓDIGO CON MEJORAS *****/
+
+    // Función para renderizar los botones de categorías
+    function renderCategoryMenu() {
+      const categoryMenu = document.getElementById('categoryMenu');
+      categoryMenu.innerHTML = "";
+      
+      if (Object.keys(categoryData).length === 0) {
+        console.warn("No hay categorías para mostrar.");
+        return;
+      }
+      
+      Object.keys(categoryData).forEach((cat, index) => {
+        const btn = document.createElement('button');
+        btn.textContent = cat;
+        btn.addEventListener('click', () => {
+          selectedCategory = cat;
+          selectedSubcategory = null; // reiniciamos la subcategoría
+          updateActiveButtons(categoryMenu, btn);
+          renderSubCategoryMenu(cat);
+          renderProducts();
+        });
+        categoryMenu.appendChild(btn);
+        
+        // Seleccionar la primera categoría por defecto
+        if (index === 0 && !selectedCategory) {
+          btn.click();
+        }
+      });
+    }
+    
+    // Renderiza botones de subcategorías
+    function renderSubCategoryMenu(category) {
+      const subCategoryMenu = document.getElementById('subCategoryMenu');
+      const subs = categoryData[category] || [];
+      subCategoryMenu.innerHTML = "";
+      if (subs.length > 0) {
+        subCategoryMenu.style.display = "flex";
+        subs.forEach(sub => {
+                  const btn = document.createElement('button');
+          btn.textContent = sub;
+          btn.addEventListener('click', () => {
+            selectedSubcategory = sub;
+            updateActiveButtons(subCategoryMenu, btn);
+            renderProducts();
+          });
+          subCategoryMenu.appendChild(btn);
+        });
+      } else {
+        subCategoryMenu.style.display = "none";
+      }
+    }
+    
+    // Actualiza el botón activo
+    function updateActiveButtons(container, activeBtn) {
+      container.querySelectorAll('button').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      activeBtn.classList.add('active');
+    }
+    
+    // Variables para control de selección en la interfaz
+    let selectedProduct = null;
+    let selectedCategory = null;
+    let selectedSubcategory = null;
+    
+    // Renderiza productos filtrados
+    function renderProducts() {
+      const productList = document.getElementById('productList');
+      productList.innerHTML = "";
+      
+      if (products.length === 0) {
+        productList.innerHTML = '<p style="text-align: center; width: 100%; padding: 20px;">No hay productos disponibles</p>';
+        return;
+      }
+      
+      let filteredProducts = products;
+      if (selectedCategory) {
+        filteredProducts = filteredProducts.filter(prod => prod.category === selectedCategory);
+      }
+      if (selectedSubcategory) {
+        filteredProducts = filteredProducts.filter(prod => prod.subcategory === selectedSubcategory);
+      }
+      
+      if (filteredProducts.length === 0) {
+        productList.innerHTML = '<p style="text-align: center; width: 100%; padding: 20px;">No hay productos en esta categoría</p>';
+        return;
+      }
+      
+      filteredProducts.forEach(product => {
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        // Usar una imagen de fallback más optimizada
+        const fallbackImage = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0Ij48cGF0aCBmaWxsPSIjZTc0YzNjIiBkPSJNMTIgMkM2LjQ4IDIgMiA2LjQ4IDIgMTJzNC40OCAxMCAxMCAxMCAxMC00LjQ4IDEwLTEwUzE3LjUyIDIgMTIgMnptMSAxNWgtMnYtMmgydjJ6bTAtNGgtMlY3aDJ2NnoiLz48L3N2Zz4=';
+        
+        card.innerHTML = `
+          <img src="${product.image || fallbackImage}" 
+               alt="${product.name}" 
+               onerror="this.onerror=null; this.src='${fallbackImage}';">
+          <div class="card-body">
+            <h3>${product.name}</h3>
+            <p>${product.description}</p>
+            <p class="price">${product.price.toFixed(2)} €</p>
+          </div>
+        `;
+        card.addEventListener('click', () => openModal(product));
+        productList.appendChild(card);
+      });
+      
+      // Guardar la posición de scroll para restaurar después
+      try {
+        localStorage.setItem('lastCategoryScroll', window.scrollY);
+      } catch (e) {
+        console.warn("No se pudo guardar posición de scroll:", e);
+      }
+    }
+    
+    // Retorna un icono según la sección del menú
+    function getSectionIcon(sectionName) {
+      const icons = {
+        primerPlato: '🍝',
+        segundoPlato: '🍲',
+        postre: '🍰',
+        entrante: '🥗',
+        bebida: '🥤'
+      };
+      return icons[sectionName] || '📋';
+    }
+    
+    // Abre el modal de producto
+    function openModal(product) {
+      selectedProduct = product;
+      const modalImg = document.getElementById('modalImg');
+      const modalTitle = document.getElementById('modalTitle');
+      const modalDesc = document.getElementById('modalDesc');
+      const modalPrice = document.getElementById('modalPrice');
+      const modalSubtotal = document.getElementById('modalSubtotal');
+      const modalQtyDisplay = document.getElementById('modalQty');
+      const modalNote = document.getElementById('modalNote');
+      const productModal = document.getElementById('productModal');
+      
+      // Usar una imagen de fallback más optimizada
+      const fallbackImage = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgd2lkdGg9IjI0IiBoZWlnaHQ9IjI0Ij48cGF0aCBmaWxsPSIjZTc0YzNjIiBkPSJNMTIgMkM2LjQ4IDIgMiA2LjQ4IDIgMTJzNC40OCAxMCAxMCAxMCAxMC00LjQ4IDEwLTEwUzE3LjUyIDIgMTIgMnptMSAxNWgtMnYtMmgydjJ6bTAtNGgtMlY3aDJ2NnoiLz48L3N2Zz4=';
+      
+      modalImg.src = product.image || fallbackImage;
+      modalImg.alt = product.name;
+      modalImg.onerror = function() {
+        this.onerror = null;
+        this.src = fallbackImage;
+      };
+      
+      modalTitle.textContent = product.name;
+      modalDesc.textContent = product.description;
+      modalPrice.textContent = product.price.toFixed(2);
+      modalSubtotal.textContent = product.price.toFixed(2);
+      modalQtyDisplay.textContent = "1";
+      modalNote.value = "";
+      // Restaura visibilidad de elementos comunes
+      document.getElementById('quantitySelector').style.display = "";
+      modalNote.style.display = "";
+      document.getElementById('pSubtotal').style.display = "";
+      document.getElementById('lblCantidad').style.display = "";
+      document.getElementById('lblNota').style.display = "";
+      // Remueve el bloque de menú si existe y quita la clase "menu-mode"
+      let menuOptionsDiv = document.getElementById('menuOptions');
+      if(menuOptionsDiv) menuOptionsDiv.remove();
+      productModal.classList.remove('menu-mode');
+      
+      productModal.classList.add('active');
+      document.getElementById('overlay').classList.add('active');
+      document.body.classList.add('no-scroll');
+      
+      // Si es producto de tipo "Menu", ajusta el modal
+      if(selectedProduct.category === "Menu") {
+        productModal.classList.add('menu-mode');
+        // Oculta elementos no requeridos en menú
+        document.getElementById('quantitySelector').style.display = "none";
+        document.getElementById('pSubtotal').style.display = "none";
+        document.getElementById('lblCantidad').style.display = "none";
+        document.getElementById('lblNota').style.display = "none";
+        document.getElementById('modalNote').style.display = "none";
+        document.getElementById('modalImg').style.display = "none";
+
+        const menuOptionsDiv = document.createElement('div');
+        menuOptionsDiv.id = "menuOptions";
+        menuOptionsDiv.style.maxHeight = "350px";
+        menuOptionsDiv.style.overflowY = "auto";
+        menuOptionsDiv.style.padding = "15px";
+
+        // Genera HTML dinámico basado en menuOptions
+        let menuHTML = `
+          <style>
+            .menu-container {
+              display: grid;
+              grid-template-columns: repeat(3, 1fr);
+              gap: 25px;
+              margin-bottom: 20px;
+            }
+            .menu-section {
+              background: #f8f9fa;
+              border-radius: 10px;
+              padding: 15px;
+              box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            }
+            .menu-section p {
+              color: #2c3e50;
+              font-weight: 600;
+              font-size: 1.1em;
+              margin-bottom: 15px;
+              padding-bottom: 8px;
+              border-bottom: 2px solid #3498db;
+            }
+            .menu-option {
+              display: flex;
+              align-items: center;
+              padding: 10px;
+              margin: 8px 0;
+              border-radius: 5px;
+              transition: all 0.2s;
+              background: white;
+            }
+            .menu-option:hover {
+              background: #f0f3f5;
+              transform: translateX(5px);
+            }
+            .menu-option input {
+              margin-right: 12px;
+              accent-color: #3498db;
+            }
+            .menu-notes p {
+              font-weight: 600;
+              color: #2c3e50;
+              margin-bottom: 10px;
+            }
+            .menu-notes textarea {
+              width: 100%;
+              padding: 12px;
+              border: 2px solid #e0e0e0;
+              border-radius: 8px;
+              resize: vertical;
+              min-height: 80px;
+              font-family: inherit;
+            }
+            .menu-notes textarea:focus {
+              outline: none;
+              border-color: #3498db;
+              box-shadow: 0 0 8px rgba(52,152,219,0.2);
+            }
+            @media (max-width: 768px) {
+              .menu-container {
+                grid-template-columns: 1fr;
+              }
+            }
+          </style>
+          <div class="menu-container">`;
+
+        // Verificar si menuOptions existe y es un objeto
+        if (product.menuOptions && typeof product.menuOptions === 'object') {
+          // Genera secciones dinámicamente
+          Object.entries(product.menuOptions).forEach(([sectionName, options]) => {
+            if (Array.isArray(options)) {
+              menuHTML += `
+                <div class="menu-section">
+                  <p>${getSectionIcon(sectionName)} ${sectionName}</p>
+                  ${options.map(option => `
+                    <div class="menu-option">
+                      <input type="radio" name="${sectionName}" value="${option}">
+                      ${option}
+                    </div>
+                  `).join('')}
+                </div>`;
+            }
+          });
+        } else {
+          menuHTML += `<p>Este menú no tiene opciones configuradas</p>`;
+        }
+
+        menuHTML += `</div>
+          <div class="menu-notes">
+            <p>📝 Notas adicionales:</p>
+            <textarea id="menuNotes" placeholder="Indica aquí tus preferencias o alergias..."></textarea>
+          </div>`;
+
+        menuOptionsDiv.innerHTML = menuHTML;
+        document.querySelector('.modal-body').appendChild(menuOptionsDiv);
+      }
+    }
+    
+    // Cierra el modal
+    function closeModal() {
+      const productModal = document.getElementById('productModal');
+      productModal.classList.remove('active');
+      document.getElementById('overlay').classList.remove('active');
+      document.body.classList.remove('no-scroll');
+      selectedProduct = null;
+      let menuOptionsDiv = document.getElementById('menuOptions');
+      if(menuOptionsDiv) menuOptionsDiv.remove();
+      document.getElementById('quantitySelector').style.display = "";
+      document.getElementById('modalNote').style.display = "";
+      document.getElementById('pSubtotal').style.display = "";
+      document.getElementById('lblCantidad').style.display = "";
+      document.getElementById('lblNota').style.display = "";
+      document.getElementById('modalImg').style.display = "";
+    }
+    
+    // Incrementa o decrementa cantidad
+    const decreaseQtyBtn = document.getElementById('decreaseQty');
+    const increaseQtyBtn = document.getElementById('increaseQty');
+    decreaseQtyBtn.addEventListener('click', () => {
+      const modalQtyDisplay = document.getElementById('modalQty');
+      let qty = parseInt(modalQtyDisplay.textContent);
+      if(qty > 1) {
+        qty--;
+        modalQtyDisplay.textContent = qty;
+        if(selectedProduct)
+          document.getElementById('modalSubtotal').textContent = (selectedProduct.price * qty).toFixed(2);
+      }
+    });
+    increaseQtyBtn.addEventListener('click', () => {
+      const modalQtyDisplay = document.getElementById('modalQty');
+      let qty = parseInt(modalQtyDisplay.textContent);
+      qty++;
+      modalQtyDisplay.textContent = qty;
+      if(selectedProduct)
+          document.getElementById('modalSubtotal').textContent = (selectedProduct.price * qty).toFixed(2);
+    });
+    
+    // Agrega producto al carrito
+    function addProductToCart() {
+      if (!selectedProduct) return;
+      const modalQtyDisplay = document.getElementById('modalQty');
+      const modalNote = document.getElementById('modalNote');
+      if(selectedProduct.category === "Menu") {
+        // Valida que se hayan seleccionado todas las opciones
+        const selections = {};
+        let isValid = true;
+        
+        // Verifica si menuOptions existe
+        if (!selectedProduct.menuOptions || typeof selectedProduct.menuOptions !== 'object') {
+          showMessage("Este menú no tiene opciones configuradas correctamente.");
+          return;
+        }
+        
+        Object.keys(selectedProduct.menuOptions).forEach(section => {
+          const selected = document.querySelector(`input[name="${section}"]:checked`);
+          if (!selected) isValid = false;
+          selections[section] = selected ? selected.value : null;
+        });
+        
+        if (!isValid) {
+          showMessage("Debe seleccionar todas las opciones del menú.");
+          return;
+        }
+        
+        // Construye la nota a partir de las selecciones
+        let note = Object.entries(selections)
+          .map(([section, value]) => `${section}: ${value}`)
+          .join(' | ');
+          
+        const extraNotes = document.getElementById('menuNotes').value.trim();
+        if (extraNotes) note += ` | Notas: ${extraNotes}`;
+        
+        // Agrega al carrito con cantidad 1 y guarda la selección
+        cart.push({ 
+          ...selectedProduct, 
+          qty: 1,
+          note,
+          menuSelections: selections,
+          addedAt: new Date().toISOString()
+        });
+        updateCart();
+        closeModal();
+        return;
+      }
+      
+      // Para productos normales
+      let qty = parseInt(modalQtyDisplay.textContent);
+      let note = modalNote.value.trim();
+      
+      const exist = cart.find(item => item.id === selectedProduct.id && item.note === note);
+      if (exist) {
+        exist.qty += qty;
+      } else {
+        cart.push({ 
+          ...selectedProduct, 
+          qty, 
+          note,
+          addedAt: new Date().toISOString()
+        });
+      }
+      updateCart();
+      closeModal();
+    }
+    
+    // Elimina producto del carrito
+    function removeCartItem(index) {
+      cart.splice(index, 1);
+      updateCart();
+    }
+    
+    // Actualiza vista del carrito
+    function updateCart() {
+      const cartItemsDiv = document.getElementById('cartItems');
+      const cartTotal = document.getElementById('cartTotal');
+      let totalPrice = 0;
+      cartItemsDiv.innerHTML = "";
+      cart.forEach((item, index) => {
+        totalPrice += item.price * item.qty;
+        const div = document.createElement('div');
+        let noteDisplay = '';
+        if(item.category === "Menu") {
+          noteDisplay = Object.values(item.menuSelections).join(' + ');
+          if(item.note.includes("| Notas:")) {
+            noteDisplay += ' ' + item.note.split("| Notas:")[1].trim();
+          }
+        } else {
+          noteDisplay = item.note;
+        }
+        div.className = 'cart-item';
+        div.innerHTML = `
+          <span class="item-info">${item.name} x ${item.qty}${noteDisplay ? ' (' + noteDisplay + ')' : ''}</span>
+          <span class="item-price">${(item.price * item.qty).toFixed(2)} €</span>
+        `;
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'delete-item-btn';
+        deleteBtn.innerHTML = `<svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor">
+                                  <path d="M9,3V4H4V6H5V19A1,1 0 0,0 6,20H18A1,1 0 0,0 19,19V6H20V4H15V3H9M7,6H17V19H7V6Z" />
+                                </svg>`;
+        deleteBtn.addEventListener('click', () => removeCartItem(index));
+        div.appendChild(deleteBtn);
+        cartItemsDiv.appendChild(div);
+      });
+      cartTotal.textContent = totalPrice.toFixed(2);
+      let totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
+      const cartCount = document.getElementById('cartCount');
+      if(totalItems > 0) {
+        cartCount.style.display = "block";
+        cartCount.textContent = totalItems;
+      } else {
+        cartCount.style.display = "none";
+      }
+      
+      // Persistir carrito en localStorage
+      try {
+        localStorage.setItem('restaurantCart', JSON.stringify(cart));
+      } catch (e) {
+        console.error("Error al guardar carrito en localStorage:", e);
+      }
+      
+      window.cart = cart;
+    }
+    
+    // Abre y cierra panel del carrito
+    const openCartBtn = document.getElementById('openCart');
+    const cartPanel = document.getElementById('cartPanel');
+    const closeCartPanelBtn = document.getElementById('closeCartPanel');
+    openCartBtn.addEventListener('click', () => {
+      cartPanel.classList.add('open');
+      document.getElementById('overlay').classList.add('active');
+      document.body.classList.add('no-scroll');
+    });
+    closeCartPanelBtn.addEventListener('click', () => {
+      cartPanel.classList.remove('open');
+      document.getElementById('overlay').classList.remove('active');
+      document.body.classList.remove('no-scroll');
+    });
+    
+    // Modal de confirmación de pedido
+    const checkoutBtn = document.getElementById('checkoutBtn');
+    const orderModal = document.getElementById('orderModal');
+    const orderTotalDisplay = document.getElementById('orderTotal');
+    const closeOrderModalBtn = document.getElementById('closeOrderModal');
+    const cancelOrderBtn = document.getElementById('cancelOrder');
+    const confirmOrderBtn = document.getElementById('confirmOrder');
+    checkoutBtn.addEventListener('click', () => {
+      if (cart.length > 0) {
+        orderTotalDisplay.textContent = document.getElementById('cartTotal').textContent;
+        orderModal.classList.add('active');
+        document.getElementById('overlay').classList.add('active');
+        document.body.classList.add('no-scroll');
+      } else {
+        showMessage("El carrito está vacío.");
+      }
+    });
+    closeOrderModalBtn.addEventListener('click', () => {
+      orderModal.classList.remove('active');
+      document.getElementById('overlay').classList.remove('active');
+      document.body.classList.remove('no-scroll');
+    });
+    cancelOrderBtn.addEventListener('click', () => {
+      orderModal.classList.remove('active');
+      document.getElementById('overlay').classList.remove('active');
+      document.body.classList.remove('no-scroll');
+    });
+    confirmOrderBtn.addEventListener('click', async () => {
+      try {
+        // Mostrar mensaje de procesamiento
+        orderModal.classList.remove('active');
+        showMessage("Procesando pedido...", true);
+        
+        if (typeof window.realizarPedido === 'function') {
+          await window.realizarPedido();
+        } else {
+          console.log("Función realizarPedido no disponible. Simulando pedido...");
+          // Simular el pedido como respaldo
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+        
+        // Limpiar carrito y localStorage
+        cart = [];
+        try {
+          localStorage.removeItem('restaurantCart');
+        } catch (e) {
+          console.error("Error al limpiar carrito de localStorage:", e);
+        }
+        
+        updateCart();
+        closeMessage();
+        
+        orderModal.classList.remove('active');
+        cartPanel.classList.remove('open');
+        showMessage("✅ Pedido realizado con éxito. ¡Buen provecho!");
+      } catch (error) {
+        console.error("Error al guardar el pedido:", error);
+        closeMessage();
+        showMessage("❌ Error al guardar el pedido: " + error.message);
+      }
+    });
+    
+    // Modal de mensaje mejorada
+    const messageModal = document.getElementById('messageModal');
+    const messageModalText = document.getElementById('messageModalText');
+    const closeMessageModal = document.getElementById('closeMessageModal');
+    const closeMessageModalBtn = document.getElementById('closeMessageModalBtn');
+    
+    function showMessage(message, isLoading = false) {
+      messageModalText.textContent = message;
+      messageModal.classList.add('active');
+      
+      // Añadir o quitar clase de carga
+      if (isLoading) {
+        messageModal.classList.add('loading');
+        document.getElementById('closeMessageModalBtn').style.display = 'none';
+      } else {
+        messageModal.classList.remove('loading');
+        document.getElementById('closeMessageModalBtn').style.display = 'block';
+      }
+      
+      document.getElementById('overlay').classList.add('active');
+      document.body.classList.add('no-scroll');
+    }
+    
+    function closeMessage() {
+      messageModal.classList.remove('active');
+      messageModal.classList.remove('loading');
+      document.getElementById('overlay').classList.remove('active');
+      document.body.classList.remove('no-scroll');
+    }
+    
+    closeMessageModal.addEventListener('click', closeMessage);
+    closeMessageModalBtn.addEventListener('click', closeMessage);
+    document.getElementById('overlay').addEventListener('click', () => {
+      const productModal = document.getElementById('productModal');
+      if(productModal.classList.contains('active')) { closeModal(); }
+      if(cartPanel.classList.contains('open')) { 
+        cartPanel.classList.remove('open');
+        document.getElementById('overlay').classList.remove('active');
+        document.body.classList.remove('no-scroll');
+      }
+      if(orderModal.classList.contains('active')) { 
+        orderModal.classList.remove('active');
+        document.getElementById('overlay').classList.remove('active');
+        document.body.classList.remove('no-scroll');
+      }
+      if(messageModal.classList.contains('active')) { closeMessage(); }
+    });
+    
+    // Vincular eventos de botones
+    document.getElementById('closeModal').addEventListener('click', closeModal);
+    document.getElementById('addToCartBtn').addEventListener('click', addProductToCart);
+    document.getElementById('cancelModal').addEventListener('click', closeModal);
+    
+    // Declaración del array para el carrito
+    let cart = [];
+    
+    // Recuperar carrito guardado si existe
+    try {
+      const savedCart = localStorage.getItem('restaurantCart');
+      if (savedCart) {
+        cart = JSON.parse(savedCart);
+        console.log("Carrito recuperado de localStorage:", cart.length, "items");
+      }
+    } catch (e) {
+      console.error("Error al recuperar carrito guardado:", e);
+    }
+    
+    // Detector de conexión a internet
+    window.addEventListener('load', function() {
+      function updateOnlineStatus() {
+        if (navigator.onLine) {
+          console.log("🟢 Aplicación online");
+          document.body.classList.remove('offline-mode');
+          // Intentar sincronizar pedidos pendientes si estamos online
+          syncPendingOrders();
+        } else {
+          console.log("🔴 Aplicación offline");
+          document.body.classList.add('offline-mode');
+          showMessage("⚠️ Sin conexión a internet. La aplicación funcionará en modo offline.");
+        }
+      }
+
+      window.addEventListener('online', updateOnlineStatus);
+      window.addEventListener('offline', updateOnlineStatus);
+      updateOnlineStatus();
+      
+      // Función para sincronizar pedidos pendientes
+      async function syncPendingOrders() {
+        if (!navigator.onLine) return;
+        
+        try {
+          const pendingOrders = JSON.parse(localStorage.getItem('orders') || '[]');
+          const pendingToSync = pendingOrders.filter(order => order.pendingSyncToFirebase);
+          
+          if (pendingToSync.length === 0) return;
+          
+          console.log(`Intentando sincronizar ${pendingToSync.length} pedidos pendientes`);
+          
+          // Importar función de Firebase solo si estamos online
+          try {
+            const { guardarPedido } = await import('./app.js');
+            
+            // Sincronizar cada pedido
+            for (const order of pendingToSync) {
+              try {
+                await guardarPedido(order);
+                // Marcar como sincronizado
+                order.pendingSyncToFirebase = false;
+                order.syncedToFirebase = true;
+                order.syncTime = new Date().toISOString();
+              } catch (e) {
+                console.error("Error al sincronizar pedido:", e);
+              }
+            }
+            
+            // Actualizar localStorage con los cambios
+            localStorage.setItem('orders', JSON.stringify(pendingOrders));
+            
+            // Notificar si se sincronizaron pedidos
+            const syncedCount = pendingToSync.filter(order => order.syncedToFirebase).length;
+            if (syncedCount > 0) {
+              console.log(`✅ ${syncedCount} pedidos sincronizados con Firebase`);
+            }
+          } catch (e) {
+            console.warn("No se pudo cargar módulo Firebase para sincronización:", e);
+          }
+        } catch (e) {
+          console.error("Error en proceso de sincronización:", e);
+        }
+      }
+    });
+    
+    // Inicializar la carga de productos y actualizar UI
+    loadProductsFromSheet();
+    updateCart(); // Para mostrar carrito recuperado de localStorage
+  </script>
+  
+  <!-- Bloque separado para la integración con Firebase usando módulos -->
+  <script type="module">
+    // Función que intenta importar guardarPedido, pero proporciona una alternativa si falla
+    let guardarPedido;
+    
+    try {
+      const module = await import('./app.js');
+      guardarPedido = module.guardarPedido;
+      console.log("Módulo Firebase cargado correctamente");
+      
+      // Verificar la conexión a Firebase
+      if (!module.db) {
+        throw new Error("La conexión a Firebase no se ha establecido correctamente");
+      }
+    } catch (e) {
+      console.warn("No se pudo cargar el módulo Firebase. Usando función de respaldo:", e);
+      
+      // Mostrar una alerta más visible en consola cuando estemos en producción
+      if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        console.error("%c⚠️ ADVERTENCIA: Firebase no está funcionando en producción", "color: red; font-size: 16px; font-weight: bold;");
+      }
+      
+      // Función de respaldo mejorada con más contexto
+      guardarPedido = async function(orderData) {
+        console.log("MODO OFFLINE: Simulando guardado de pedido:", orderData);
+        // Simular un retraso en la red
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Guardar en localStorage como respaldo
+        const orders = JSON.parse(localStorage.getItem('orders') || '[]');
+        const orderWithMeta = {
+          ...orderData,
+          timestamp: new Date().toISOString(),
+          savedOffline: true,
+          pendingSyncToFirebase: true
+        };
+        orders.push(orderWithMeta);
+        localStorage.setItem('orders', JSON.stringify(orders));
+        
+        // Notificar al usuario que estamos en modo offline
+        if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+          showMessage("⚠️ Pedido guardado en modo offline. Se sincronizará cuando vuelva la conexión.");
+        }
+        
+        return { success: true, offline: true, key: `offline-${Date.now()}` };
+      };
+    }
+
+    // Versión mejorada de realizarPedido con mayor manejo de errores
+    async function realizarPedido() {
+      try {
+        const mesa = document.title || "Mesa sin nombre";
+        const pedido = window.cart || [];
+        
+        if (pedido.length === 0) {
+          throw new Error("El carrito está vacío");
+        }
+        
+        const precioTotal = pedido.reduce((sum, item) => sum + (item.price * item.qty), 0);
+        const notas = document.getElementById('modalNote') ? document.getElementById('modalNote').value.trim() : "";
+        
+        const orderData = {
+          mesa,
+          pedido: JSON.parse(JSON.stringify(pedido)), // Crear copia profunda para evitar referencias circulares
+          precio: precioTotal,
+          notas,
+          fecha: new Date().toISOString(),
+          dispositivo: navigator.userAgent, // Añadir información del dispositivo para debugging
+          estado: "pendiente"
+        };
+
+        const result = await guardarPedido(orderData);
+        console.log("Pedido procesado:", result);
+        return true;
+      } catch (error) {
+        console.error("Error al procesar el pedido:", error);
+        // Mostrar un mensaje más amigable al usuario
+        if (typeof showMessage === 'function') {
+          showMessage("No se pudo procesar el pedido. Por favor, inténtelo de nuevo o contacte al administrador.");
+        }
+        throw error;
+      }
+    }
+
+    window.realizarPedido = realizarPedido;
+  </script>
+</body>
+</html>
+  
