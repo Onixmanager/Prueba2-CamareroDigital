@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <title>Panel Admin - Restaurante</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Mulish:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg:        #F4F2EE;
+      --surface:   #FFFFFF;
+      --surface2:  #F9F8F6;
+      --border:    #E5E2DC;
+      --ink:       #1A1A18;
+      --ink-muted: #7A7870;
+      --ink-dim:   #BEBAB2;
+      --accent:    #1A1A18;
+      --accent-fg: #FFFFFF;
+      --danger:    #D94F3D;
+      --warn:      #E8922A;
+      --success:   #2D9B6F;
+      --radius:    12px;
+      --radius-sm: 7px;
+      --shadow:    0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.06);
+      --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+      --tr:        all 0.25s cubic-bezier(0.25,0.46,0.45,0.94);
+    }
+
+    *, *::before, *::after {
+      margin: 0; padding: 0;
+      box-sizing: border-box;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      font-family: 'Mulish', sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    /* ── LOADER ── */
+    .loader-wrap {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(244,242,238,0.7);
+      backdrop-filter: blur(4px);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .loader-wrap.active { display: flex; }
+    .loader-ring {
+      width: 44px; height: 44px;
+      border: 3px solid var(--border);
+      border-top-color: var(--ink);
+      border-radius: 50%;
+      animation: spin 0.85s linear infinite;
+    }
+    .loader-wrap p {
+      font-size: 0.82rem;
+      color: var(--ink-muted);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed;
+      bottom: 24px; left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--ink);
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 30px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      z-index: 9998;
+      opacity: 0;
+      transition: all 0.35s cubic-bezier(0.34,1.56,0.64,1);
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: var(--shadow-lg);
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+    .toast.success { background: var(--success); }
+    .toast.error   { background: var(--danger); }
+    .toast.warn    { background: var(--warn); }
+
+    /* ── HEADER ── */
+    header {
+      height: 64px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 1.5rem;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-icon {
+      width: 36px; height: 36px;
+      background: var(--ink);
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+
+    .header-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--ink);
+      letter-spacing: -0.01em;
+    }
+
+    .header-subtitle {
+      font-size: 0.7rem;
+      color: var(--ink-muted);
+      font-weight: 400;
+    }
+
+    .btn-manage {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      background: var(--ink);
+      color: #fff;
+      border: none;
+      padding: 0 1.1rem;
+      height: 38px;
+      border-radius: 8px;
+      font-family: 'Mulish', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      cursor: pointer;
+      transition: var(--tr);
+    }
+    .btn-manage:hover { opacity: 0.85; transform: translateY(-1px); }
+    .btn-manage.open { background: var(--surface); color: var(--ink); border: 1.5px solid var(--border); }
+
+    /* ── ADMIN PANEL ── */
+    #adminPanel {
+      display: none;
+      animation: slideDown 0.3s ease-out;
+    }
+    #adminPanel.open { display: block; }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .panel-container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 4rem;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.8rem;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .panel-header h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--ink);
+      letter-spacing: -0.02em;
+    }
+
+    .panel-header p {
+      font-size: 0.8rem;
+      color: var(--ink-muted);
+      margin-top: 2px;
+    }
+
+    .action-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    /* ── BUTTONS ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 0 1rem;
+      height: 38px;
+      font-family: 'Mulish', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--tr);
+      letter-spacing: 0.01em;
+      white-space: nowrap;
+    }
+    .btn-primary { background: var(--ink); color: #fff; }
+    .btn-primary:hover { opacity: 0.85; transform: translateY(-1px); }
+    .btn-secondary { background: var(--surface); color: var(--ink); border: 1.5px solid var(--border); }
+    .btn-secondary:hover { background: var(--bg); }
+    .btn-danger { background: rgba(217,79,61,0.1); color: var(--danger); border: 1px solid rgba(217,79,61,0.2); }
+    .btn-danger:hover { background: rgba(217,79,61,0.18); }
+    .btn-edit { background: rgba(26,26,24,0.07); color: var(--ink); border: 1px solid var(--border); }
+    .btn-edit:hover { background: rgba(26,26,24,0.12); }
+    .btn-sm { height: 32px; padding: 0 0.75rem; font-size: 0.78rem; }
+    .btn-warn { background: rgba(232,146,42,0.1); color: var(--warn); border: 1px solid rgba(232,146,42,0.25); }
+    .btn-warn:hover { background: rgba(232,146,42,0.18); }
+
+    /* ── TABLE ── */
+    .table-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    .table-toolbar {
+      padding: 1rem 1.2rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .table-search {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0 12px;
+      height: 36px;
+      flex: 1;
+      max-width: 280px;
+    }
+    .table-search i { color: var(--ink-dim); font-size: 0.82rem; }
+    .table-search input {
+      border: none;
+      background: transparent;
+      font-family: 'Mulish', sans-serif;
+      font-size: 0.85rem;
+      color: var(--ink);
+      width: 100%;
+      outline: none;
+    }
+    .table-search input::placeholder { color: var(--ink-dim); }
+
+    .table-count {
+      font-size: 0.78rem;
+      color: var(--ink-muted);
+      font-weight: 600;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead tr {
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      padding: 10px 14px;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--ink-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      text-align: left;
+    }
+
+    td {
+      padding: 12px 14px;
+      font-size: 0.85rem;
+      color: var(--ink);
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    tbody tr:last-child td { border-bottom: none; }
+
+    tbody tr {
+      transition: background 0.15s;
+    }
+    tbody tr:hover { background: var(--surface2); }
+
+    .td-name { font-weight: 600; }
+    .td-cat {
+      display: inline-flex;
+      align-items: center;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2px 10px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--ink-muted);
+    }
+    .td-price {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 0.92rem;
+    }
+    .td-type {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.73rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 20px;
+    }
+    .td-type.menu { background: rgba(45,155,111,0.1); color: var(--success); }
+    .td-type.product { background: rgba(26,26,24,0.06); color: var(--ink-muted); }
+
+    .action-buttons { display: flex; gap: 6px; align-items: center; }
+
+    /* Empty state */
+    .empty-state {
+      padding: 3rem 2rem;
+      text-align: center;
+      color: var(--ink-muted);
+    }
+    .empty-state i { font-size: 2.5rem; margin-bottom: 1rem; opacity: 0.35; display: block; }
+    .empty-state p { font-size: 0.9rem; }
+
+    /* ── MODALS ── */
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 0;
+    }
+    .modal.active { display: flex; }
+
+    .modal-content {
+      background: var(--surface);
+      width: 100%;
+      max-width: 560px;
+      max-height: 92vh;
+      border-radius: var(--radius) var(--radius) 0 0;
+      overflow-y: auto;
+      animation: sheetUp 0.32s cubic-bezier(0.34,1.46,0.64,1);
+      position: relative;
+    }
+
+    @media (min-width: 640px) {
+      .modal {
+        align-items: center;
+        padding: 1rem;
+      }
+      .modal-content {
+        border-radius: var(--radius);
+        max-height: 88vh;
+        animation: scaleIn 0.28s cubic-bezier(0.34,1.46,0.64,1);
+      }
+    }
+
+    @keyframes sheetUp {
+      from { transform: translateY(100%); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
+    }
+    @keyframes scaleIn {
+      from { transform: scale(0.94); opacity: 0; }
+      to   { transform: scale(1);    opacity: 1; }
+    }
+
+    .modal-handle {
+      width: 36px; height: 4px;
+      background: var(--border);
+      border-radius: 4px;
+      margin: 12px auto 0;
+      display: block;
+    }
+    @media (min-width: 640px) { .modal-handle { display: none; } }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.2rem 1.4rem 0.8rem;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: var(--surface);
+      z-index: 2;
+    }
+
+    .modal-header h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .modal-close {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      border: 1.5px solid var(--border);
+      background: var(--surface2);
+      color: var(--ink-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: var(--tr);
+      font-size: 0.85rem;
+    }
+    .modal-close:hover { color: var(--ink); border-color: var(--ink); transform: rotate(90deg); }
+
+    .modal-body {
+      padding: 1.3rem 1.4rem;
+    }
+
+    /* ── FORM ── */
+    .form-group {
+      margin-bottom: 1.1rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--ink-muted);
+      margin-bottom: 6px;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 10px 13px;
+      font-family: 'Mulish', sans-serif;
+      font-size: 0.9rem;
+      color: var(--ink);
+      background: var(--surface2);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      transition: var(--tr);
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+      border-color: var(--ink);
+      background: var(--surface);
+      box-shadow: 0 0 0 3px rgba(26,26,24,0.07);
+    }
+
+    .form-group textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+
+    .form-group input[type="file"] {
+      padding: 8px;
+      cursor: pointer;
+      font-size: 0.82rem;
+      color: var(--ink-muted);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    @media (max-width: 480px) {
+      .form-row { grid-template-columns: 1fr; }
+    }
+
+    .form-hint {
+      font-size: 0.72rem;
+      color: var(--ink-dim);
+      margin-top: 4px;
+    }
+
+    .modal-footer {
+      padding: 1rem 1.4rem 1.4rem;
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+      position: sticky;
+      bottom: 0;
+    }
+
+    .modal-footer .btn { flex: 1; justify-content: center; }
+
+    /* ── MENU CONSTRUCTOR ── */
+    .constructor-wrap {
+      background: var(--surface2);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 1rem;
+      margin-top: 0.4rem;
+    }
+
+    .constructor-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.8rem;
+    }
+
+    .constructor-top p {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--ink-muted);
+    }
+
+    .menu-section {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.9rem;
+      margin-bottom: 0.7rem;
+      animation: fadeUp 0.25s ease-out;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .section-header {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 0.7rem;
+    }
+
+    .section-header input.section-title {
+      flex: 1;
+      padding: 7px 10px;
+      font-family: 'Mulish', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--surface2);
+      color: var(--ink);
+      outline: none;
+      transition: var(--tr);
+    }
+    .section-header input.section-title:focus {
+      border-color: var(--ink);
+      box-shadow: 0 0 0 3px rgba(26,26,24,0.07);
+    }
+
+    .options-container { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+
+    .option-row {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      animation: fadeUp 0.2s ease-out;
+    }
+
+    .option-row input.option-input {
+      flex: 1;
+      padding: 7px 10px;
+      font-family: 'Mulish', sans-serif;
+      font-size: 0.84rem;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--surface2);
+      color: var(--ink);
+      outline: none;
+      transition: var(--tr);
+    }
+    .option-row input.option-input:focus {
+      border-color: var(--ink);
+      background: var(--surface);
+    }
+
+    /* ── CONFIRM DIALOG ── */
+    .confirm-dialog {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      backdrop-filter: blur(4px);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    .confirm-dialog.active { display: flex; }
+    .confirm-box {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      max-width: 340px;
+      width: 100%;
+      box-shadow: var(--shadow-lg);
+      animation: scaleIn 0.25s cubic-bezier(0.34,1.46,0.64,1);
+    }
+    .confirm-box .icon {
+      width: 44px; height: 44px;
+      background: rgba(217,79,61,0.1);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      color: var(--danger);
+      margin-bottom: 1rem;
+    }
+    .confirm-box h4 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem;
+      font-weight: 800;
+      margin-bottom: 0.4rem;
+    }
+    .confirm-box p { font-size: 0.85rem; color: var(--ink-muted); margin-bottom: 1.2rem; }
+    .confirm-actions { display: flex; gap: 8px; }
+    .confirm-actions .btn { flex: 1; justify-content: center; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 640px) {
+      .panel-container { padding: 1.2rem 0.9rem 4rem; }
+      .panel-header { margin-bottom: 1.2rem; }
+      th:nth-child(3), td:nth-child(3),
+      th:nth-child(4), td:nth-child(4) { display: none; }
+      .table-search { max-width: 100%; }
+    }
+
+    @media (max-width: 400px) {
+      header { padding: 0 1rem; }
+      .header-title { font-size: 0.95rem; }
+    }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  </style>
+</head>
+<body>
+
+  <!-- LOADER -->
+  <div class="loader-wrap" id="loader">
+    <div class="loader-ring"></div>
+    <p>Cargando…</p>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
+
+  <!-- CONFIRM DIALOG -->
+  <div class="confirm-dialog" id="confirmDialog">
+    <div class="confirm-box">
+      <div class="icon"><i class="fas fa-trash-alt"></i></div>
+      <h4>¿Eliminar producto?</h4>
+      <p>Esta acción no se puede deshacer. El producto se eliminará permanentemente.</p>
+      <div class="confirm-actions">
+        <button class="btn btn-secondary" id="confirmCancel">Cancelar</button>
+        <button class="btn btn-danger" id="confirmOk">Eliminar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HEADER -->
+  <header>
+    <div class="header-left">
+      <div class="header-icon"><i class="fas fa-utensils"></i></div>
+      <div>
+        <div class="header-title">Panel Admin</div>
+        <div class="header-subtitle">Restaurante · Carta Digital</div>
+      </div>
+    </div>
+    <button class="btn-manage" id="toggleAdmin">
+      <i class="fas fa-sliders-h"></i> Gestionar
+    </button>
+  </header>
+
+  <!-- ADMIN PANEL -->
+  <div id="adminPanel">
+    <div class="panel-container">
+
+      <div class="panel-header">
+        <div>
+          <h2>Productos & Menús</h2>
+          <p>Gestiona el catálogo de tu restaurante</p>
+        </div>
+        <div class="action-row">
+          <button class="btn btn-secondary" id="newMenuBtn">
+            <i class="fas fa-list-alt"></i> Nuevo Menú
+          </button>
+          <button class="btn btn-primary" id="newProductBtn">
+            <i class="fas fa-plus"></i> Nuevo Producto
+          </button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <div class="table-toolbar">
+          <div class="table-search">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchInput" placeholder="Buscar producto…">
+          </div>
+          <span class="table-count" id="tableCount">— productos</span>
+        </div>
+        <div id="adminTableContainer">
+          <div class="empty-state">
+            <i class="fas fa-box-open"></i>
+            <p>Pulsa «Gestionar» para cargar los productos</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MODAL: Producto -->
+  <div class="modal" id="adminModal">
+    <div class="modal-content">
+      <span class="modal-handle"></span>
+      <div class="modal-header">
+        <h3 id="adminModalTitle">Nuevo Producto</h3>
+        <button class="modal-close" id="cancelAdminModalBtn"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="adminProductId">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nombre *</label>
+            <input type="text" id="adminProductName" placeholder="Ej: Gazpacho andaluz">
+          </div>
+          <div class="form-group">
+            <label>Precio (€) *</label>
+            <input type="number" id="adminProductPrice" step="0.01" placeholder="0.00">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Descripción</label>
+          <textarea id="adminProductDescription" placeholder="Descripción breve del producto…"></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Categoría *</label>
+            <input type="text" id="adminProductCategory" placeholder="Ej: Entrantes">
+          </div>
+          <div class="form-group">
+            <label>Subcategoría</label>
+            <input type="text" id="adminProductSubcategory" placeholder="Ej: Fríos">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Imagen</label>
+          <input type="file" id="adminProductImage" accept="image/*">
+          <p class="form-hint">Se sube a Imgur automáticamente. Máx. recomendado: 2 MB.</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="cancelAdminModalBtn2">Cancelar</button>
+        <button class="btn btn-primary" id="saveAdminProductBtn"><i class="fas fa-check"></i> Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: Menú -->
+  <div class="modal" id="menuModal">
+    <div class="modal-content">
+      <span class="modal-handle"></span>
+      <div class="modal-header">
+        <h3 id="menuModalTitle">Nuevo Menú</h3>
+        <button class="modal-close" id="cancelMenuModalBtn"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="adminMenuId">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Título del Menú *</label>
+            <input type="text" id="adminMenuTitleField" placeholder="Ej: Menú Degustación">
+          </div>
+          <div class="form-group">
+            <label>Precio (€) *</label>
+            <input type="number" id="adminMenuPrice" step="0.01" placeholder="0.00">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Descripción</label>
+          <textarea id="adminMenuDescription" placeholder="Descripción del menú…"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Imagen</label>
+          <input type="file" id="adminMenuImage" accept="image/*">
+        </div>
+        <div class="form-group">
+          <label>Secciones del Menú</label>
+          <div class="constructor-wrap">
+            <div class="constructor-top">
+              <p>Constructor de secciones</p>
+              <button class="btn btn-sm btn-secondary" type="button" id="addSectionMenuBtn">
+                <i class="fas fa-plus"></i> Sección
+              </button>
+            </div>
+            <div id="menuModalSectionsContainer"></div>
+          </div>
+        </div>
+        <input type="hidden" id="menuOptionsMenu">
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="cancelMenuModalBtn2">Cancelar</button>
+        <button class="btn btn-primary" id="saveMenuBtn"><i class="fas fa-check"></i> Guardar Menú</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ─────────────────────────────────────────────
+    // CONFIGURACIÓN  ← Pon aquí tus credenciales
+    // ─────────────────────────────────────────────
+    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/‹TU_ID›/exec';
+    const IMGUR_CLIENT_ID   = '‹TU_CLIENT_ID_IMGUR›';
+
+    // ─────────────────────────────────────────────
+    // ESTADO
+    // ─────────────────────────────────────────────
+    let products      = [];
+    let deleteIndex   = null;
+    let searchTerm    = '';
+
+    // ─────────────────────────────────────────────
+    // UTILIDADES UI
+    // ─────────────────────────────────────────────
+    function showLoader() { document.getElementById('loader').classList.add('active'); }
+    function hideLoader() { document.getElementById('loader').classList.remove('active'); }
+
+    let toastTimer;
+    function showToast(msg, type = '') {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className   = 'toast show ' + type;
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => { t.classList.remove('show'); }, 3200);
+    }
+
+    function openModal(id)  { document.getElementById(id).classList.add('active'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+    // ─────────────────────────────────────────────
+    // CORS FIX: fetch con mode no-cors para POST a Apps Script
+    // Para GET usamos ?callback para evitar el bloqueo.
+    // Para POST usamos fetch con mode:'no-cors' + luego recargamos.
+    // ─────────────────────────────────────────────
+
+    /**
+     * GET desde Apps Script — usa jsonp para evitar CORS en lectura.
+     * Apps Script doGet devuelve JSONP si recibe ?callback=NOMBRE
+     */
+    function fetchGET() {
+      return new Promise((resolve, reject) => {
+        const cbName = '__gsCallback_' + Date.now();
+        const script = document.createElement('script');
+        const timeout = setTimeout(() => {
+          cleanup();
+          reject(new Error('Timeout al conectar con Google Apps Script'));
+        }, 12000);
+
+        window[cbName] = (data) => {
+          cleanup();
+          resolve(data);
+        };
+
+        script.onerror = () => {
+          cleanup();
+          reject(new Error('No se pudo cargar el script de Google Apps Script'));
+        };
+
+        script.src = `${GOOGLE_SCRIPT_URL}?callback=${cbName}&t=${Date.now()}`;
+        document.head.appendChild(script);
+
+        function cleanup() {
+          clearTimeout(timeout);
+          delete window[cbName];
+          if (script.parentNode) script.parentNode.removeChild(script);
+        }
+      });
+    }
+
+    /**
+     * POST hacia Apps Script — usa mode:'no-cors' (opaque response).
+     * No podemos leer la respuesta pero el servidor la recibe sin problema.
+     * Tras el POST recargamos los datos vía GET para confirmar.
+     */
+    async function fetchPOST(payload) {
+      await fetch(GOOGLE_SCRIPT_URL, {
+        method:  'POST',
+        mode:    'no-cors',          // ← CLAVE: evita el bloqueo CORS
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify(payload)
+      });
+      // Con no-cors la respuesta es opaca (no readable), pero el servidor
+      // la procesa correctamente. Esperamos un momento y recargamos.
+      await new Promise(r => setTimeout(r, 900));
+    }
+
+    // ─────────────────────────────────────────────
+    // CARGA Y RENDERIZADO
+    // ─────────────────────────────────────────────
+    async function loadProducts() {
+      showLoader();
+      try {
+        const data = await fetchGET();
+        // Apps Script debe devolver: callback([{id,name,price,category,...}, ...])
+        products = Array.isArray(data) ? data : [];
+        renderProducts();
+        showToast('✓ Productos cargados', 'success');
+      } catch (err) {
+        console.error(err);
+        showToast('Error al cargar: ' + err.message, 'error');
+      }
+      hideLoader();
+    }
+
+    function renderProducts() {
+      const c = document.getElementById('adminTableContainer');
+      const filtered = products.filter(p =>
+        !searchTerm ||
+        p.name?.toLowerCase().includes(searchTerm) ||
+        p.category?.toLowerCase().includes(searchTerm)
+      );
+
+      document.getElementById('tableCount').textContent =
+        filtered.length + ' producto' + (filtered.length !== 1 ? 's' : '');
+
+      if (filtered.length === 0) {
+        c.innerHTML = `<div class="empty-state">
+          <i class="fas fa-search"></i>
+          <p>${searchTerm ? 'Sin resultados para «' + searchTerm + '»' : 'No hay productos. ¡Añade el primero!'}</p>
+        </div>`;
+        return;
+      }
+
+      let html = `<table>
+        <thead><tr>
+          <th>Producto</th>
+          <th>Precio</th>
+          <th>Categoría</th>
+          <th>Tipo</th>
+          <th>Acciones</th>
+        </tr></thead><tbody>`;
+
+      filtered.forEach((p, i) => {
+        const isMenu = p.category === 'Menu' || !!p.menuOptions;
+        html += `<tr>
+          <td class="td-name">${escHtml(p.name || '—')}</td>
+          <td class="td-price">${p.price != null ? Number(p.price).toFixed(2) + ' €' : '—'}</td>
+          <td><span class="td-cat">${escHtml(p.category || '—')}</span></td>
+          <td><span class="td-type ${isMenu ? 'menu' : 'product'}">
+            <i class="fas ${isMenu ? 'fa-list-alt' : 'fa-circle'}" style="font-size:0.6rem;"></i>
+            ${isMenu ? 'Menú' : 'Producto'}
+          </span></td>
+          <td class="action-buttons">
+            <button class="btn btn-sm btn-edit" onclick="editProduct(${i})">
+              <i class="fas fa-pen"></i> Editar
+            </button>
+            <button class="btn btn-sm btn-danger" onclick="confirmDelete(${i})">
+              <i class="fas fa-trash"></i>
+            </button>
+          </td>
+        </tr>`;
+      });
+
+      html += `</tbody></table>`;
+      c.innerHTML = html;
+    }
+
+    function escHtml(str) {
+      return String(str)
+        .replace(/&/g,'&amp;')
+        .replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;')
+        .replace(/"/g,'&quot;');
+    }
+
+    // ─────────────────────────────────────────────
+    // BÚSQUEDA
+    // ─────────────────────────────────────────────
+    document.getElementById('searchInput').addEventListener('input', e => {
+      searchTerm = e.target.value.trim().toLowerCase();
+      renderProducts();
+    });
+
+    // ─────────────────────────────────────────────
+    // CRUD PRODUCTOS
+    // ─────────────────────────────────────────────
+    function editProduct(i) {
+      const p = products[i];
+      document.getElementById('adminProductId').value          = p.id          || '';
+      document.getElementById('adminProductName').value        = p.name        || '';
+      document.getElementById('adminProductDescription').value = p.description || '';
+      document.getElementById('adminProductPrice').value       = p.price       || '';
+      document.getElementById('adminProductCategory').value    = p.category    || '';
+      document.getElementById('adminProductSubcategory').value = p.subcategory || '';
+      document.getElementById('adminProductImage').value       = '';
+      document.getElementById('adminModalTitle').textContent   = 'Editar Producto';
+      openModal('adminModal');
+    }
+
+    function confirmDelete(i) {
+      deleteIndex = i;
+      document.getElementById('confirmDialog').classList.add('active');
+    }
+
+    document.getElementById('confirmCancel').onclick = () => {
+      deleteIndex = null;
+      document.getElementById('confirmDialog').classList.remove('active');
+    };
+
+    document.getElementById('confirmOk').onclick = async () => {
+      if (deleteIndex === null) return;
+      document.getElementById('confirmDialog').classList.remove('active');
+      showLoader();
+      try {
+        await fetchPOST({ action: 'delete', id: products[deleteIndex].id });
+        await loadProducts();
+        showToast('Producto eliminado', 'success');
+      } catch (err) {
+        showToast('Error: ' + err.message, 'error');
+      }
+      deleteIndex = null;
+      hideLoader();
+    };
+
+    document.getElementById('newProductBtn').onclick = () => {
+      document.getElementById('adminModalTitle').textContent = 'Nuevo Producto';
+      ['adminProductId','adminProductName','adminProductDescription',
+       'adminProductPrice','adminProductCategory','adminProductSubcategory'].forEach(id => {
+        document.getElementById(id).value = '';
+      });
+      document.getElementById('adminProductImage').value = '';
+      openModal('adminModal');
+    };
+
+    // Cierre modal producto
+    ['cancelAdminModalBtn','cancelAdminModalBtn2'].forEach(id => {
+      document.getElementById(id).onclick = () => closeModal('adminModal');
+    });
+
+    document.getElementById('saveAdminProductBtn').onclick = async () => {
+      const nameF  = document.getElementById('adminProductName');
+      const priceF = document.getElementById('adminProductPrice');
+      const catF   = document.getElementById('adminProductCategory');
+      if (!nameF.value || !priceF.value || !catF.value) {
+        showToast('Completa los campos obligatorios (*)', 'warn');
+        return;
+      }
+
+      let imageUrl = '';
+      const file = document.getElementById('adminProductImage').files[0];
+      if (file) {
+        showLoader();
+        try {
+          imageUrl = await uploadImgur(file);
+        } catch(e) {
+          hideLoader();
+          showToast('Error subiendo imagen: ' + e.message, 'error');
+          return;
+        }
+      }
+
+      const isEdit = !!document.getElementById('adminProductId').value;
+      const payload = {
+        action:      isEdit ? 'update' : 'add',
+        id:          document.getElementById('adminProductId').value || Date.now().toString(),
+        name:        nameF.value.trim(),
+        description: document.getElementById('adminProductDescription').value.trim(),
+        price:       parseFloat(priceF.value),
+        image:       imageUrl,
+        category:    catF.value.trim(),
+        subcategory: document.getElementById('adminProductSubcategory').value.trim()
+      };
+
+      showLoader();
+      try {
+        await fetchPOST(payload);
+        closeModal('adminModal');
+        await loadProducts();
+        showToast(isEdit ? '✓ Producto actualizado' : '✓ Producto añadido', 'success');
+      } catch (err) {
+        showToast('Error guardando: ' + err.message, 'error');
+      }
+      hideLoader();
+    };
+
+    // ─────────────────────────────────────────────
+    // CRUD MENÚS
+    // ─────────────────────────────────────────────
+    function addMenuSection(defaultTitle = '', defaultOptions = []) {
+      const container = document.getElementById('menuModalSectionsContainer');
+      const sectionDiv = document.createElement('div');
+      sectionDiv.className = 'menu-section';
+
+      const secHeader = document.createElement('div');
+      secHeader.className = 'section-header';
+
+      const titleIn = document.createElement('input');
+      titleIn.type = 'text';
+      titleIn.placeholder = 'Nombre de la sección (ej: Primer plato)';
+      titleIn.className = 'section-title';
+      titleIn.value = defaultTitle;
+      titleIn.oninput = updateMenuJSONMenu;
+
+      const remSecBtn = document.createElement('button');
+      remSecBtn.type = 'button';
+      remSecBtn.className = 'btn btn-sm btn-danger';
+      remSecBtn.innerHTML = '<i class="fas fa-trash"></i>';
+      remSecBtn.onclick = () => { sectionDiv.remove(); updateMenuJSONMenu(); };
+
+      secHeader.append(titleIn, remSecBtn);
+
+      const optsCt = document.createElement('div');
+      optsCt.className = 'options-container';
+
+      const addOptBtn = document.createElement('button');
+      addOptBtn.type = 'button';
+      addOptBtn.className = 'btn btn-sm btn-secondary';
+      addOptBtn.innerHTML = '<i class="fas fa-plus"></i> Opción';
+      addOptBtn.onclick = () => addMenuOptionMenu(optsCt);
+
+      sectionDiv.append(secHeader, optsCt, addOptBtn);
+      container.appendChild(sectionDiv);
+      defaultOptions.forEach(o => addMenuOptionMenu(optsCt, o));
+      updateMenuJSONMenu();
+    }
+
+    function addMenuOptionMenu(optsCt, val = '') {
+      const row = document.createElement('div');
+      row.className = 'option-row';
+
+      const inp = document.createElement('input');
+      inp.type = 'text';
+      inp.placeholder = 'Ej: Ensalada mixta';
+      inp.className = 'option-input';
+      inp.value = val;
+      inp.oninput = updateMenuJSONMenu;
+
+      const rem = document.createElement('button');
+      rem.type = 'button';
+      rem.className = 'btn btn-sm btn-danger';
+      rem.innerHTML = '<i class="fas fa-times"></i>';
+      rem.onclick = () => { row.remove(); updateMenuJSONMenu(); };
+
+      row.append(inp, rem);
+      optsCt.appendChild(row);
+    }
+
+    function updateMenuJSONMenu() {
+      const out = {};
+      document.querySelectorAll('#menuModalSectionsContainer .menu-section').forEach(sec => {
+        const title = sec.querySelector('.section-title').value.trim();
+        if (!title) return;
+        const key  = title.replace(/\s+/g, '');
+        const opts = Array.from(sec.querySelectorAll('.option-input'))
+          .map(i => i.value.trim()).filter(v => v);
+        if (opts.length) out[key] = opts;
+      });
+      document.getElementById('menuOptionsMenu').value = JSON.stringify(out);
+    }
+
+    document.getElementById('newMenuBtn').onclick = () => {
+      ['adminMenuId','adminMenuTitleField','adminMenuDescription',
+       'adminMenuPrice','adminMenuImage'].forEach(id => {
+        document.getElementById(id).value = '';
+      });
+      document.getElementById('menuModalSectionsContainer').innerHTML = '';
+      document.getElementById('menuModalTitle').textContent = 'Nuevo Menú';
+      openModal('menuModal');
+    };
+
+    ['cancelMenuModalBtn','cancelMenuModalBtn2'].forEach(id => {
+      document.getElementById(id).onclick = () => closeModal('menuModal');
+    });
+
+    document.getElementById('addSectionMenuBtn').onclick = () => addMenuSection();
+
+    document.getElementById('saveMenuBtn').onclick = async () => {
+      const titleF = document.getElementById('adminMenuTitleField');
+      const priceF = document.getElementById('adminMenuPrice');
+      if (!titleF.value || !priceF.value) {
+        showToast('Título y precio son obligatorios', 'warn');
+        return;
+      }
+      updateMenuJSONMenu();
+
+      let imageUrl = '';
+      const file = document.getElementById('adminMenuImage').files[0];
+      if (file) {
+        showLoader();
+        try {
+          imageUrl = await uploadImgur(file);
+        } catch(e) {
+          hideLoader();
+          showToast('Error subiendo imagen: ' + e.message, 'error');
+          return;
+        }
+      }
+
+      const isEdit = !!document.getElementById('adminMenuId').value;
+      let menuOptions = {};
+      try { menuOptions = JSON.parse(document.getElementById('menuOptionsMenu').value || '{}'); } catch(e) {}
+
+      const payload = {
+        action:      isEdit ? 'updateMenu' : 'addMenu',
+        id:          document.getElementById('adminMenuId').value || Date.now().toString(),
+        name:        titleF.value.trim(),
+        description: document.getElementById('adminMenuDescription').value.trim(),
+        price:       parseFloat(priceF.value),
+        image:       imageUrl,
+        category:    'Menu',
+        menuOptions: JSON.stringify(menuOptions)
+      };
+
+      showLoader();
+      try {
+        await fetchPOST(payload);
+        closeModal('menuModal');
+        await loadProducts();
+        showToast(isEdit ? '✓ Menú actualizado' : '✓ Menú añadido', 'success');
+      } catch (err) {
+        showToast('Error guardando menú: ' + err.message, 'error');
+      }
+      hideLoader();
+    };
+
+    // ─────────────────────────────────────────────
+    // IMGUR UPLOAD
+    // ─────────────────────────────────────────────
+    async function uploadImgur(file) {
+      const fd = new FormData();
+      fd.append('image', file);
+      const res  = await fetch('https://api.imgur.com/3/image/', {
+        method:  'POST',
+        headers: { Authorization: `Client-ID ${IMGUR_CLIENT_ID}` },
+        body:    fd
+      });
+      const json = await res.json();
+      if (!json.success) throw new Error('Imgur: ' + (json.data?.error || 'error desconocido'));
+      return json.data.link;
+    }
+
+    // ─────────────────────────────────────────────
+    // TOGGLE PANEL
+    // ─────────────────────────────────────────────
+    document.getElementById('toggleAdmin').onclick = () => {
+      const panel = document.getElementById('adminPanel');
+      const btn   = document.getElementById('toggleAdmin');
+      const isOpen = panel.classList.toggle('open');
+      btn.classList.toggle('open', isOpen);
+      btn.innerHTML = isOpen
+        ? '<i class="fas fa-times"></i> Cerrar'
+        : '<i class="fas fa-sliders-h"></i> Gestionar';
+      if (isOpen) loadProducts();
+    };
+
+    // ─────────────────────────────────────────────
+    // CERRAR modales al hacer clic en el backdrop
+    // ─────────────────────────────────────────────
+    ['adminModal','menuModal'].forEach(id => {
+      document.getElementById(id).addEventListener('click', e => {
+        if (e.target === e.currentTarget) closeModal(id);
+      });
+    });
+  </script>
+</body>
+</html>
