@@ -1,0 +1,1373 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel de Cocina</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:         #0D0F12;
+      --surface:    #141720;
+      --surface2:   #1C2030;
+      --surface3:   #232840;
+      --border:     rgba(255,255,255,0.07);
+      --border2:    rgba(255,255,255,0.12);
+
+      --ink:        #EDF0F7;
+      --ink-muted:  #8892A4;
+      --ink-dim:    #4A5368;
+
+      --pending:    #F5A623;
+      --pending-bg: rgba(245,166,35,0.12);
+      --pending-bd: rgba(245,166,35,0.3);
+
+      --done:       #2ECC8F;
+      --done-bg:    rgba(46,204,143,0.1);
+      --done-bd:    rgba(46,204,143,0.3);
+
+      --cancel:     #E74C3C;
+      --cancel-bg:  rgba(231,76,60,0.1);
+      --cancel-bd:  rgba(231,76,60,0.3);
+
+      --accent:     #4F8EF7;
+      --accent-bg:  rgba(79,142,247,0.12);
+
+      --radius:     12px;
+      --radius-sm:  7px;
+      --tr:         all 0.22s cubic-bezier(0.25,0.46,0.45,0.94);
+    }
+
+    *, *::before, *::after {
+      margin: 0; padding: 0;
+      box-sizing: border-box;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 4px; }
+
+    /* ══════════════════════════════════════
+       LOGIN MODAL
+    ══════════════════════════════════════ */
+    .login-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      padding: 20px;
+      backdrop-filter: blur(8px);
+    }
+
+    .login-content {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      padding: 2.5rem 2rem;
+      border-radius: var(--radius);
+      text-align: center;
+      max-width: 320px;
+      width: 100%;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+      animation: modalPop 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    }
+
+    @keyframes modalPop {
+      from { opacity: 0; transform: scale(0.9) translateY(16px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .login-logo {
+      width: 52px; height: 52px;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      color: var(--accent);
+      margin: 0 auto 1.4rem;
+    }
+
+    .login-content h2 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 0.3rem;
+      letter-spacing: -0.01em;
+    }
+
+    .login-content p {
+      font-size: 0.8rem;
+      color: var(--ink-muted);
+      margin-bottom: 1.5rem;
+    }
+
+    .login-content input {
+      width: 100%;
+      padding: 11px 14px;
+      margin-bottom: 14px;
+      border: 1.5px solid var(--border2);
+      border-radius: var(--radius-sm);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1rem;
+      background: var(--surface2);
+      color: var(--ink);
+      text-align: center;
+      letter-spacing: 0.3em;
+      transition: var(--tr);
+      outline: none;
+    }
+
+    .login-content input::placeholder {
+      font-family: 'Outfit', sans-serif;
+      letter-spacing: 0.02em;
+      color: var(--ink-dim);
+      font-size: 0.85rem;
+    }
+
+    .login-content input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(79,142,247,0.15);
+    }
+
+    .login-content button {
+      width: 100%;
+      padding: 11px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: var(--tr);
+      letter-spacing: 0.02em;
+    }
+
+    .login-content button:hover {
+      background: #6BA3FF;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(79,142,247,0.3);
+    }
+
+    .login-error {
+      color: var(--cancel);
+      margin-top: 12px;
+      font-size: 0.82rem;
+      font-weight: 500;
+      display: none;
+      animation: shake 0.5s ease;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60%  { transform: translateX(-6px); }
+      40%, 80%  { transform: translateX(6px); }
+    }
+
+    /* ══════════════════════════════════════
+       CONFIRM MODAL
+    ══════════════════════════════════════ */
+    .confirm-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      padding: 20px;
+      backdrop-filter: blur(6px);
+    }
+
+    .confirm-content {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      padding: 2rem;
+      border-radius: var(--radius);
+      text-align: center;
+      max-width: 380px;
+      width: 100%;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+      animation: modalPop 0.25s cubic-bezier(0.34,1.56,0.64,1);
+    }
+
+    .confirm-icon {
+      width: 52px; height: 52px;
+      background: var(--cancel-bg);
+      border: 1px solid var(--cancel-bd);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      color: var(--cancel);
+      margin: 0 auto 1.2rem;
+    }
+
+    .confirm-content h2 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 0.5rem;
+    }
+
+    .confirm-content p {
+      font-size: 0.82rem;
+      color: var(--ink-muted);
+      line-height: 1.5;
+      margin-bottom: 1.5rem;
+    }
+
+    .confirm-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    /* ══════════════════════════════════════
+       HEADER
+    ══════════════════════════════════════ */
+    .admin-header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 1.5rem;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      gap: 12px;
+    }
+
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .brand-icon {
+      width: 34px; height: 34px;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent);
+      font-size: 0.9rem;
+    }
+
+    .brand-name {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--ink);
+      letter-spacing: -0.01em;
+    }
+
+    .brand-sub {
+      font-size: 0.68rem;
+      color: var(--ink-dim);
+      font-weight: 400;
+    }
+
+    /* Live indicator */
+    .live-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(46,204,143,0.1);
+      border: 1px solid rgba(46,204,143,0.25);
+      border-radius: 20px;
+      padding: 4px 10px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--done);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .live-dot {
+      width: 6px; height: 6px;
+      background: var(--done);
+      border-radius: 50%;
+      animation: blink 1.4s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.2; }
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .ctrl-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0 12px;
+      height: 34px;
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-sm);
+      background: var(--surface2);
+      color: var(--ink-muted);
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--tr);
+      white-space: nowrap;
+    }
+
+    .ctrl-btn:hover {
+      color: var(--ink);
+      border-color: var(--border2);
+      background: var(--surface3);
+    }
+
+    .ctrl-btn.danger {
+      color: var(--cancel);
+      border-color: var(--cancel-bd);
+      background: var(--cancel-bg);
+    }
+
+    .ctrl-btn.danger:hover {
+      background: rgba(231,76,60,0.18);
+    }
+
+    .ctrl-btn i { font-size: 0.82rem; }
+
+    /* ══════════════════════════════════════
+       FILTER BAR
+    ══════════════════════════════════════ */
+    .filter-bar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      height: 50px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .filter-bar::-webkit-scrollbar { display: none; }
+
+    .filter-btn {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 0 14px;
+      height: 32px;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: transparent;
+      color: var(--ink-muted);
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--tr);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .filter-btn:hover {
+      color: var(--ink);
+      border-color: var(--border2);
+      background: var(--surface2);
+    }
+
+    .filter-btn.active {
+      background: var(--surface3);
+      border-color: var(--border2);
+      color: var(--ink);
+    }
+
+    .filter-btn[data-filter="pending"].active  { background: var(--pending-bg); border-color: var(--pending-bd); color: var(--pending); }
+    .filter-btn[data-filter="completed"].active { background: var(--done-bg);    border-color: var(--done-bd);    color: var(--done); }
+    .filter-btn[data-filter="cancelled"].active { background: var(--cancel-bg);  border-color: var(--cancel-bd);  color: var(--cancel); }
+
+    .filter-count {
+      background: var(--surface3);
+      border-radius: 20px;
+      padding: 1px 7px;
+      font-size: 0.7rem;
+      min-width: 20px;
+      text-align: center;
+    }
+
+    .filter-btn.active .filter-count { background: rgba(255,255,255,0.15); }
+
+    /* Mobile select */
+    .filters-select {
+      display: none;
+    }
+
+    .filter-indicator {
+      text-align: center;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+      color: var(--ink-muted);
+      opacity: 0;
+      transform: translateY(-10px);
+      transition: var(--tr);
+    }
+
+    .filter-indicator.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ══════════════════════════════════════
+       MAIN CONTENT
+    ══════════════════════════════════════ */
+    .admin-container {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 1.5rem;
+    }
+
+    /* Stats bar */
+    .stats-bar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .stat-chip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 8px 14px;
+      font-size: 0.8rem;
+      color: var(--ink-muted);
+      font-weight: 500;
+    }
+
+    .stat-chip strong {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    .stat-chip .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* ══════════════════════════════════════
+       ORDERS GRID
+    ══════════════════════════════════════ */
+    .orders-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 14px;
+    }
+
+    /* ══════════════════════════════════════
+       ORDER CARD
+    ══════════════════════════════════════ */
+    .order-card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      border-top: 3px solid transparent;
+      overflow: hidden;
+      position: relative;
+      transition: var(--tr);
+      animation: cardIn 0.35s ease-out both;
+    }
+
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .order-card:hover {
+      border-color: var(--border2);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+      transform: translateY(-2px);
+    }
+
+    .order-card[data-status="pending"]   { border-top-color: var(--pending); }
+    .order-card[data-status="completed"] { border-top-color: var(--done); }
+    .order-card[data-status="cancelled"] { border-top-color: var(--cancel); opacity: 0.65; }
+
+    /* Card header */
+    .card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .card-table {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .table-icon {
+      width: 32px; height: 32px;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent);
+      font-size: 0.8rem;
+      flex-shrink: 0;
+    }
+
+    .table-name {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--ink);
+      letter-spacing: -0.01em;
+    }
+
+    .order-status {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      flex-shrink: 0;
+    }
+
+    .order-status::before {
+      content: '';
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: currentColor;
+      display: block;
+    }
+
+    .status-pending   { background: var(--pending-bg); color: var(--pending); border: 1px solid var(--pending-bd); }
+    .status-completed { background: var(--done-bg);    color: var(--done);    border: 1px solid var(--done-bd); }
+    .status-cancelled { background: var(--cancel-bg);  color: var(--cancel);  border: 1px solid var(--cancel-bd); }
+
+    /* Card meta */
+    .card-meta {
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      color: var(--ink-dim);
+      border-bottom: 1px solid var(--border);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .card-meta i { font-size: 0.7rem; }
+
+    /* Card items */
+    .order-items {
+      list-style: none;
+      padding: 10px 16px;
+      max-height: 200px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .order-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 7px 8px;
+      border-radius: var(--radius-sm);
+      transition: background 0.15s;
+    }
+
+    .order-item:hover { background: var(--surface2); }
+
+    .item-left { flex: 1; }
+
+    .item-name {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 2px;
+    }
+
+    .item-qty {
+      display: inline-block;
+      background: var(--surface3);
+      color: var(--ink-muted);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 1px 6px;
+      border-radius: 4px;
+      margin-right: 4px;
+    }
+
+    .item-detail {
+      font-size: 0.74rem;
+      color: var(--ink-muted);
+      margin-top: 2px;
+      line-height: 1.4;
+    }
+
+    .item-note {
+      font-size: 0.72rem;
+      color: var(--pending);
+      margin-top: 2px;
+      font-style: italic;
+    }
+
+    .item-price {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--ink-muted);
+      flex-shrink: 0;
+      padding-left: 8px;
+    }
+
+    /* Notes */
+    .order-notes {
+      margin: 0 16px 10px;
+      background: rgba(245,166,35,0.07);
+      border: 1px solid var(--pending-bd);
+      border-left: 3px solid var(--pending);
+      border-radius: var(--radius-sm);
+      padding: 8px 10px;
+      font-size: 0.8rem;
+      color: var(--ink-muted);
+      line-height: 1.4;
+    }
+
+    .order-notes strong { color: var(--pending); }
+
+    /* Card actions */
+    .order-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 0;
+      border-top: 1px solid var(--border);
+    }
+
+    .action-btn {
+      padding: 11px 8px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      transition: var(--tr);
+      color: var(--ink-muted);
+      border-right: 1px solid var(--border);
+      letter-spacing: 0.01em;
+    }
+
+    .action-btn:last-child { border-right: none; }
+
+    .action-btn i { font-size: 0.8rem; }
+
+    .complete-btn:hover {
+      background: var(--done-bg);
+      color: var(--done);
+    }
+
+    .cancel-btn:hover {
+      background: var(--cancel-bg);
+      color: var(--cancel);
+    }
+
+    .print-btn:hover {
+      background: var(--accent-bg);
+      color: var(--accent);
+    }
+
+    /* Sorting animation */
+    .sorting-animation {
+      transition: all 0.4s ease;
+    }
+
+    /* ══════════════════════════════════════
+       EMPTY STATE
+    ══════════════════════════════════════ */
+    .empty-state {
+      grid-column: 1 / -1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 5rem 2rem;
+      text-align: center;
+      color: var(--ink-dim);
+    }
+
+    .empty-state i {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      opacity: 0.3;
+    }
+
+    .empty-state p {
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    /* ══════════════════════════════════════
+       BUTTONS (confirm dialog)
+    ══════════════════════════════════════ */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 0 16px;
+      height: 38px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--tr);
+      flex: 1;
+    }
+
+    .btn-ghost {
+      background: var(--surface2);
+      color: var(--ink-muted);
+      border: 1px solid var(--border2);
+    }
+    .btn-ghost:hover { color: var(--ink); background: var(--surface3); }
+
+    .btn-danger-solid {
+      background: var(--cancel);
+      color: white;
+    }
+    .btn-danger-solid:hover { background: #C0392B; transform: translateY(-1px); }
+
+    /* ══════════════════════════════════════
+       RESPONSIVE
+    ══════════════════════════════════════ */
+    @media (max-width: 768px) {
+      .filter-bar {
+        display: none;
+      }
+
+      .filters-select {
+        display: block;
+        width: 100%;
+        padding: 10px 14px;
+        background: var(--surface);
+        color: var(--ink);
+        border: 1px solid var(--border2);
+        border-radius: var(--radius-sm);
+        font-family: 'Outfit', sans-serif;
+        font-size: 0.9rem;
+        font-weight: 500;
+        margin-bottom: 1.2rem;
+        cursor: pointer;
+        outline: none;
+        -webkit-appearance: none;
+        appearance: none;
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%238892A4'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        background-size: 22px;
+        padding-right: 40px;
+      }
+
+      .ctrl-btn span { display: none; }
+      .ctrl-btn { padding: 0 10px; }
+
+      .brand-sub { display: none; }
+
+      .orders-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .order-actions {
+        grid-template-columns: 1fr 1fr 1fr;
+      }
+
+      .stats-bar { display: none; }
+
+      .admin-container { padding: 1rem; }
+    }
+
+    @media (max-width: 420px) {
+      .admin-header { padding: 0 1rem; }
+      .live-pill { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- LOGIN MODAL -->
+  <div id="loginModal" class="login-modal">
+    <div class="login-content">
+      <div class="login-logo"><i class="fas fa-fire-burner"></i></div>
+      <h2>Panel de Cocina</h2>
+      <p>Introduce tu PIN para acceder</p>
+      <input type="password" id="adminPinInput" placeholder="🔒 PIN de acceso">
+      <button id="loginBtn">Entrar</button>
+      <p id="loginError" class="login-error"><i class="fas fa-exclamation-triangle"></i> PIN incorrecto</p>
+    </div>
+  </div>
+
+  <!-- CONFIRM MODAL -->
+  <div id="confirmModal" class="confirm-modal">
+    <div class="confirm-content">
+      <div class="confirm-icon"><i class="fas fa-trash-alt"></i></div>
+      <h2>¿Borrar todos los pedidos?</h2>
+      <p>Esta acción es <strong style="color:var(--cancel)">irreversible</strong> y eliminará permanentemente todos los pedidos de Firebase.</p>
+      <div class="confirm-buttons">
+        <button id="cancelDelete" class="btn btn-ghost"><i class="fas fa-times"></i> Cancelar</button>
+        <button id="confirmDelete" class="btn btn-danger-solid"><i class="fas fa-trash-alt"></i> Borrar todo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HEADER -->
+  <header class="admin-header">
+    <div class="header-brand">
+      <div class="brand-icon"><i class="fas fa-fire-burner"></i></div>
+      <div>
+        <div class="brand-name">Cocina</div>
+        <div class="brand-sub">Pedidos en tiempo real</div>
+      </div>
+    </div>
+
+    <div class="live-pill">
+      <span class="live-dot"></span>
+      En vivo
+    </div>
+
+    <div class="header-controls">
+      <button id="soundToggle" class="ctrl-btn">
+        <i class="fas fa-bell"></i> <span>Sonido: ON</span>
+      </button>
+      <button id="deleteAllBtn" class="ctrl-btn danger">
+        <i class="fas fa-trash-alt"></i> <span>Borrar todo</span>
+      </button>
+      <button id="logoutBtn" class="ctrl-btn">
+        <i class="fas fa-sign-out-alt"></i> <span>Salir</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- FILTER BAR (desktop) -->
+  <div class="filter-bar">
+    <button class="filter-btn active" data-filter="all">
+      Todos <span class="filter-count" id="fc-all">0</span>
+    </button>
+    <button class="filter-btn" data-filter="pending">
+      <i class="fas fa-circle" style="font-size:0.5rem;color:var(--pending);"></i>
+      Pendientes <span class="filter-count" id="fc-pending">0</span>
+    </button>
+    <button class="filter-btn" data-filter="completed">
+      <i class="fas fa-circle" style="font-size:0.5rem;color:var(--done);"></i>
+      Completados <span class="filter-count" id="fc-completed">0</span>
+    </button>
+    <button class="filter-btn" data-filter="cancelled">
+      <i class="fas fa-circle" style="font-size:0.5rem;color:var(--cancel);"></i>
+      Cancelados <span class="filter-count" id="fc-cancelled">0</span>
+    </button>
+  </div>
+
+  <!-- MAIN -->
+  <div class="admin-container">
+
+    <!-- Stats (desktop) -->
+    <div class="stats-bar" id="statsBar">
+      <div class="stat-chip">
+        <span class="dot" style="background:var(--pending);"></span>
+        <span>Pendientes</span>
+        <strong id="stat-pending">0</strong>
+      </div>
+      <div class="stat-chip">
+        <span class="dot" style="background:var(--done);"></span>
+        <span>Completados</span>
+        <strong id="stat-completed">0</strong>
+      </div>
+      <div class="stat-chip">
+        <span class="dot" style="background:var(--cancel);"></span>
+        <span>Cancelados</span>
+        <strong id="stat-cancelled">0</strong>
+      </div>
+      <div class="stat-chip" style="margin-left:auto;">
+        <i class="fas fa-clock" style="color:var(--ink-dim);font-size:0.75rem;"></i>
+        <span>Última actualización</span>
+        <strong id="stat-time" style="font-size:0.78rem;">—</strong>
+      </div>
+    </div>
+
+    <!-- Mobile select -->
+    <select class="filters-select" id="mobileFilters">
+      <option value="all">Todos los pedidos</option>
+      <option value="pending">Pendientes</option>
+      <option value="completed">Completados</option>
+      <option value="cancelled">Cancelados</option>
+    </select>
+
+    <div id="filterIndicator" class="filter-indicator">
+      Mostrando: <span id="currentFilter">Todos los pedidos</span>
+    </div>
+
+    <div class="orders-grid" id="ordersGrid">
+      <div class="empty-state">
+        <i class="fas fa-receipt"></i>
+        <p>Esperando pedidos…<br><span style="font-size:0.8rem;opacity:0.7;">Los pedidos aparecerán aquí en tiempo real</span></p>
+      </div>
+    </div>
+  </div>
+
+  <audio id="orderSound" src="https://github.com/Onixmanager/Prueba2-CamareroDigital/raw/refs/heads/main/notificacion1.mp3" preload="auto"></audio>
+
+  <!-- ══ LÓGICA — SIN CAMBIOS ══ -->
+  <script type="module">
+    const adminPIN  = "adminadmin";
+    const sessionKey = "adminSession";
+    const elements = {
+      loginModal:     document.getElementById("loginModal"),
+      adminPinInput:  document.getElementById("adminPinInput"),
+      loginBtn:       document.getElementById("loginBtn"),
+      loginError:     document.getElementById("loginError"),
+      logoutBtn:      document.getElementById("logoutBtn"),
+      deleteAllBtn:   document.getElementById("deleteAllBtn"),
+      confirmModal:   document.getElementById("confirmModal"),
+      confirmDelete:  document.getElementById("confirmDelete"),
+      cancelDelete:   document.getElementById("cancelDelete"),
+      soundToggle:    document.getElementById("soundToggle"),
+      mobileFilters:  document.getElementById("mobileFilters"),
+      filterButtons:  document.querySelectorAll('.filter-btn'),
+      ordersGrid:     document.getElementById('ordersGrid'),
+      filterIndicator:document.getElementById('filterIndicator'),
+      currentFilter:  document.getElementById('currentFilter')
+    };
+
+    // ── Sonido ──
+    let soundEnabled  = localStorage.getItem('soundEnabled') !== 'false';
+    let lastSoundTime = 0;
+
+    function updateSoundIcon() {
+      const icon = elements.soundToggle.querySelector('i');
+      const text = elements.soundToggle.querySelector('span');
+      icon.className    = soundEnabled ? 'fas fa-bell' : 'fas fa-bell-slash';
+      if (text) text.textContent = soundEnabled ? 'Sonido: ON' : 'Sonido: OFF';
+    }
+
+    elements.soundToggle.addEventListener('click', () => {
+      soundEnabled = !soundEnabled;
+      localStorage.setItem('soundEnabled', soundEnabled);
+      updateSoundIcon();
+    });
+    updateSoundIcon();
+
+    // ── Auth ──
+    function showLoginModal() { elements.loginModal.style.display = "flex"; }
+    function hideLoginModal() { elements.loginModal.style.display = "none"; }
+    function checkAuth() {
+      localStorage.getItem(sessionKey) === "true" ? hideLoginModal() : showLoginModal();
+    }
+
+    elements.loginBtn.addEventListener("click", () => {
+      if (elements.adminPinInput.value === adminPIN) {
+        localStorage.setItem(sessionKey, "true");
+        hideLoginModal();
+      } else {
+        elements.loginError.style.display = "block";
+        elements.loginError.style.animation = 'none';
+        setTimeout(() => { elements.loginError.style.animation = 'shake 0.5s ease'; }, 10);
+      }
+    });
+
+    elements.adminPinInput.addEventListener("keyup", (e) => {
+      if (e.key === "Enter") elements.loginBtn.click();
+    });
+
+    elements.logoutBtn.addEventListener("click", () => {
+      localStorage.removeItem(sessionKey);
+      location.reload();
+    });
+
+    checkAuth();
+
+    // ── Firebase ──
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    import { getDatabase, ref, onChildAdded, onChildChanged, onChildRemoved, update, get, remove } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey:            "AIzaSyCzZBL-GfbxbWtPzMHOkSgnfF0UXD7wt4Y",
+      authDomain:        "pruebacamarero-b7f54.firebaseapp.com",
+      databaseURL:       "https://pruebacamarero-b7f54-default-rtdb.europe-west1.firebasedatabase.app/",
+      projectId:         "pruebacamarero-b7f54",
+      storageBucket:     "pruebacamarero-b7f54.firebasestorage.app",
+      messagingSenderId: "191387429666",
+      appId:             "1:191387429666:web:ae8472198e543c6de5d37b",
+      measurementId:     "G-KXDVQLNQW2"
+    };
+
+    const appFirebase = initializeApp(firebaseConfig);
+    const db          = getDatabase(appFirebase);
+    const pedidosRef  = ref(db, 'pedidos');
+    const orderSound  = document.getElementById('orderSound');
+
+    // ── Estadísticas ──
+    function updateStats() {
+      const cards  = document.querySelectorAll('.order-card');
+      let pending  = 0, completed = 0, cancelled = 0;
+      cards.forEach(c => {
+        if (c.dataset.status === 'pending')   pending++;
+        if (c.dataset.status === 'completed') completed++;
+        if (c.dataset.status === 'cancelled') cancelled++;
+      });
+      const total = pending + completed + cancelled;
+
+      document.getElementById('stat-pending').textContent   = pending;
+      document.getElementById('stat-completed').textContent = completed;
+      document.getElementById('stat-cancelled').textContent = cancelled;
+      document.getElementById('stat-time').textContent      = new Date().toLocaleTimeString('es-ES', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+
+      document.getElementById('fc-all').textContent       = total;
+      document.getElementById('fc-pending').textContent   = pending;
+      document.getElementById('fc-completed').textContent = completed;
+      document.getElementById('fc-cancelled').textContent = cancelled;
+    }
+
+    // ── Borrar pedidos ──
+    async function borrarTodosLosPedidos() {
+      try {
+        await remove(pedidosRef);
+        alert("Todos los pedidos han sido eliminados correctamente");
+        elements.ordersGrid.innerHTML = '';
+        updateStats();
+      } catch (error) {
+        console.error('Error al borrar pedidos:', error);
+        alert("Error al eliminar los pedidos: " + error.message);
+      }
+    }
+
+    elements.deleteAllBtn.addEventListener('click', () => {
+      elements.confirmModal.style.display = 'flex';
+    });
+    elements.cancelDelete.addEventListener('click', () => {
+      elements.confirmModal.style.display = 'none';
+    });
+    elements.confirmDelete.addEventListener('click', async () => {
+      elements.confirmModal.style.display = 'none';
+      await borrarTodosLosPedidos();
+    });
+
+    // ── Time ago ──
+    function timeAgo(fecha) {
+      const diffMs  = Date.now() - new Date(fecha).getTime();
+      const diffMin = Math.floor(diffMs / 60000);
+      if (diffMin < 1) return "Hace unos instantes";
+      return `Hace ${diffMin} min${diffMin > 1 ? '' : ''}`;
+    }
+
+    // ── Crear tarjeta ──
+    function crearOrderCard(key, data) {
+      const status = data.status || "pending";
+      let statusClass = "status-pending", statusText = "Pendiente";
+      if (status === "completed") { statusClass = "status-completed"; statusText = "Completado"; }
+      else if (status === "cancelled") { statusClass = "status-cancelled"; statusText = "Cancelado"; }
+
+      let itemsHTML = "";
+      if (Array.isArray(data.pedido)) {
+        data.pedido.forEach(item => {
+          const nombre   = item.name  || "Producto";
+          const cantidad = item.qty   || 1;
+          const precioItem = (item.price * cantidad).toFixed(2);
+
+          let detallesMenu = '';
+          if (item.menuSelections) {
+            detallesMenu = Object.entries(item.menuSelections)
+              .map(([sec, op]) => `<div class="item-detail">${sec}: ${op}</div>`)
+              .join('');
+          }
+
+          let notasItem = '';
+          if (item.note) {
+            notasItem = `<div class="item-note"><i class="fas fa-pencil-alt" style="font-size:0.6rem;"></i> ${item.note}</div>`;
+          }
+
+          itemsHTML += `
+            <li class="order-item">
+              <div class="item-left">
+                <div class="item-name">
+                  <span class="item-qty">${cantidad}×</span>${nombre}
+                </div>
+                ${detallesMenu}
+                ${notasItem}
+              </div>
+              <span class="item-price">${precioItem}€</span>
+            </li>`;
+        });
+      }
+
+      const card = document.createElement('div');
+      card.classList.add('order-card');
+      card.setAttribute('data-status', status);
+      card.setAttribute('data-key', key);
+      card.innerHTML = `
+        <div class="card-head">
+          <div class="card-table">
+            <div class="table-icon"><i class="fas fa-chair"></i></div>
+            <span class="table-name">${data.mesa || 'Mesa Desconocida'}</span>
+          </div>
+          <div class="order-status ${statusClass}">${statusText}</div>
+        </div>
+        <div class="card-meta">
+          <i class="fas fa-clock"></i>
+          ${timeAgo(data.fecha)}
+        </div>
+        <ul class="order-items">${itemsHTML}</ul>
+        ${data.notas ? `<div class="order-notes"><strong>Nota:</strong> ${data.notas}</div>` : ''}
+        <div class="order-actions">
+          <button class="action-btn complete-btn" data-action="complete">
+            <i class="fas fa-check"></i> Listo
+          </button>
+          <button class="action-btn cancel-btn" data-action="cancel">
+            <i class="fas fa-times"></i> Cancelar
+          </button>
+          <button class="action-btn print-btn" data-action="print">
+            <i class="fas fa-print"></i> Imprimir
+          </button>
+        </div>`;
+
+      card.querySelector('[data-action="complete"]').addEventListener('click', () => actualizarEstadoPedido(key, 'completed'));
+      card.querySelector('[data-action="cancel"]').addEventListener('click', () => actualizarEstadoPedido(key, 'cancelled'));
+      card.querySelector('[data-action="print"]').addEventListener('click', () => printReceipt(key, data));
+
+      return card;
+    }
+
+    // ── Actualizar estado ──
+    function actualizarEstadoPedido(key, nuevoEstado) {
+      const pedidoRef = ref(db, 'pedidos/' + key);
+      const card      = document.querySelector(`.order-card[data-key="${key}"]`);
+      if (card) {
+        card.style.transition = "all 0.5s ease";
+        setTimeout(() => {
+          card.setAttribute('data-status', nuevoEstado);
+          const statusEl = card.querySelector('.order-status');
+          statusEl.className = `order-status status-${nuevoEstado}`;
+          statusEl.textContent = nuevoEstado === 'completed' ? 'Completado'
+                               : nuevoEstado === 'cancelled' ? 'Cancelado'
+                               : 'Pendiente';
+
+          const currentFilter = document.querySelector('.filter-btn.active')?.dataset.filter;
+          if (currentFilter === 'all' || currentFilter === nuevoEstado) {
+            card.style.display = 'block';
+            card.style.opacity = '1';
+            card.style.transform = '';
+          } else {
+            card.style.opacity = '0';
+            card.style.transform = 'scale(0.85)';
+            setTimeout(() => { card.style.display = 'none'; }, 500);
+          }
+          updateStats();
+        }, 50);
+      }
+
+      update(pedidoRef, { status: nuevoEstado }).catch(error => {
+        console.error('Error al actualizar el estado:', error);
+        if (card) {
+          card.setAttribute('data-status', 'pending');
+          const statusEl = card.querySelector('.order-status');
+          statusEl.className  = 'order-status status-pending';
+          statusEl.textContent = 'Pendiente';
+          const f = document.querySelector('.filter-btn.active')?.dataset.filter;
+          if (f) filtrarPedidos(f);
+        }
+      });
+    }
+
+    // ── Agregar o actualizar pedido ──
+    function agregarOActualizarPedido(key, data) {
+      const existente = document.querySelector(`.order-card[data-key="${key}"]`);
+
+      // Si existe el empty-state, quitarlo
+      const emptyState = elements.ordersGrid.querySelector('.empty-state');
+      if (emptyState) emptyState.remove();
+
+      const card = crearOrderCard(key, data);
+
+      if (existente) {
+        existente.style.opacity = '0';
+        existente.style.transform = 'scale(0.9)';
+        setTimeout(() => {
+          elements.ordersGrid.replaceChild(card, existente);
+          const currentFilter = document.querySelector('.filter-btn.active')?.dataset.filter;
+          if (currentFilter !== 'all' && card.dataset.status !== currentFilter) card.style.display = 'none';
+          updateStats();
+        }, 300);
+      } else {
+        card.style.opacity = '0';
+        elements.ordersGrid.appendChild(card);
+        setTimeout(() => {
+          card.style.opacity = '1';
+          const currentFilter = document.querySelector('.filter-btn.active')?.dataset.filter;
+          if (currentFilter !== 'all' && card.dataset.status !== currentFilter) card.style.display = 'none';
+          updateStats();
+        }, 50);
+      }
+    }
+
+    // ── Imprimir ──
+    function printReceipt(key, data) {
+      const printWindow = window.open('', '', 'height=600,width=400');
+      printWindow.document.write('<html><head><title>Recibo de Pedido</title>');
+      printWindow.document.write('<style>body{font-family:Arial,sans-serif;padding:20px;} h2{margin-bottom:10px;} ul{list-style:none;padding:0;} li{margin-bottom:5px;padding:5px 0;border-bottom:1px solid #eee;}</style>');
+      printWindow.document.write('</head><body>');
+      printWindow.document.write('<h2>Recibo de Pedido</h2>');
+      printWindow.document.write('<p><strong>Mesa:</strong> ' + (data.mesa || 'Mesa Desconocida') + '</p>');
+      printWindow.document.write('<p><strong>Fecha:</strong> ' + new Date(data.fecha).toLocaleString() + '</p>');
+      printWindow.document.write('<ul>');
+      if (Array.isArray(data.pedido)) {
+        data.pedido.forEach(item => {
+          const cantidad    = item.qty  || 1;
+          const nombre      = item.name || 'Producto';
+          const precioTotal = (item.price * cantidad).toFixed(2);
+          let detalles = '';
+          if (item.menuSelections) {
+            detalles = Object.entries(item.menuSelections)
+              .map(([s, o]) => `<div>${s}: ${o}</div>`)
+              .join('');
+          }
+          printWindow.document.write(`<li>
+            <div>${cantidad} x ${nombre} - ${precioTotal}€</div>
+            ${detalles}
+            ${item.note ? `<div>Nota: ${item.note}</div>` : ''}
+          </li>`);
+        });
+      }
+      printWindow.document.write('</ul>');
+      if (data.notas) printWindow.document.write('<p><strong>Notas:</strong> ' + data.notas + '</p>');
+      printWindow.document.write('</body></html>');
+      printWindow.document.close();
+      printWindow.focus();
+      printWindow.print();
+      printWindow.close();
+    }
+
+    // ── Firebase listeners ──
+    onChildAdded(pedidosRef, (snapshot) => {
+      const key  = snapshot.key;
+      const data = snapshot.val();
+      if ((!data.status || data.status === "pending") && soundEnabled && Date.now() - lastSoundTime > 3000) {
+        orderSound.play().catch(e => console.error("Error de sonido:", e));
+        lastSoundTime = Date.now();
+      }
+      agregarOActualizarPedido(key, data);
+    });
+
+    onChildChanged(pedidosRef, (snapshot) => {
+      agregarOActualizarPedido(snapshot.key, snapshot.val());
+    });
+
+    onChildRemoved(pedidosRef, (snapshot) => {
+      const existente = document.querySelector(`.order-card[data-key="${snapshot.key}"]`);
+      if (existente) {
+        existente.style.opacity = '0';
+        existente.style.transform = 'scale(0.85)';
+        setTimeout(() => { existente.remove(); updateStats(); }, 300);
+      }
+    });
+
+    // ── Filtros ──
+    function updateFilters(newFilter) {
+      let filterText = "Todos los pedidos";
+      if (newFilter === 'pending')   filterText = "Pedidos pendientes";
+      if (newFilter === 'completed') filterText = "Pedidos completados";
+      if (newFilter === 'cancelled') filterText = "Pedidos cancelados";
+
+      elements.currentFilter.textContent = filterText;
+      elements.filterIndicator.classList.add('active');
+
+      elements.filterButtons.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.filter === newFilter);
+      });
+      elements.mobileFilters.value = newFilter;
+      filtrarPedidos(newFilter);
+    }
+
+    elements.mobileFilters.addEventListener('change', (e) => updateFilters(e.target.value));
+    elements.filterButtons.forEach(btn => {
+      btn.addEventListener('click', () => updateFilters(btn.dataset.filter));
+    });
+
+    function filtrarPedidos(filtro) {
+      document.querySelectorAll('.order-card').forEach(card => {
+        if (filtro === 'all' || card.dataset.status === filtro) {
+          card.classList.add('sorting-animation');
+          card.style.opacity = '0';
+          card.style.transform = 'translateY(12px)';
+          setTimeout(() => {
+            card.style.display = 'block';
+            setTimeout(() => {
+              card.style.opacity = '1';
+              card.style.transform = 'translateY(0)';
+            }, 50);
+          }, 300);
+        } else {
+          card.classList.add('sorting-animation');
+          card.style.opacity = '0';
+          card.style.transform = 'translateY(-12px)';
+          setTimeout(() => { card.style.display = 'none'; }, 300);
+        }
+      });
+    }
+
+    updateFilters('all');
+    updateStats();
+
+    // Actualizar el reloj de "última actualización" cada minuto
+    setInterval(updateStats, 60000);
+  </script>
+</body>
+</html>
