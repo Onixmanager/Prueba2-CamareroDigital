@@ -27,6 +27,20 @@
       --tr:        all 0.25s cubic-bezier(0.25,0.46,0.45,0.94);
     }
 
+    [data-theme="dark"] {
+      --bg:        #0D0F12;
+      --surface:   #141720;
+      --surface2:  #1C2030;
+      --border:    rgba(255,255,255,0.08);
+      --ink:       #EDF0F7;
+      --ink-muted: #8892A4;
+      --ink-dim:   #4A5368;
+      --accent:    #EDF0F7;
+      --accent-fg: #0D0F12;
+      --shadow:    0 1px 3px rgba(0,0,0,0.3), 0 4px 16px rgba(0,0,0,0.2);
+      --shadow-lg: 0 8px 32px rgba(0,0,0,0.5);
+    }
+
     *, *::before, *::after {
       margin: 0; padding: 0;
       box-sizing: border-box;
@@ -39,6 +53,7 @@
       color: var(--ink);
       overflow-x: hidden;
       min-height: 100vh;
+      transition: background 0.3s ease, color 0.3s ease;
     }
 
     /* ── LOADER ── */
@@ -725,9 +740,21 @@
         <div class="header-subtitle">Restaurante · Carta Digital</div>
       </div>
     </div>
-    <button class="btn-manage" id="toggleAdmin">
-      <i class="fas fa-sliders-h"></i> Gestionar
-    </button>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <button id="themeToggle" title="Cambiar tema" style="
+        width:38px;height:38px;border-radius:50%;
+        border:1.5px solid var(--border);
+        background:var(--surface2);
+        color:var(--ink-muted);
+        display:flex;align-items:center;justify-content:center;
+        cursor:pointer;font-size:0.9rem;
+        transition:var(--tr);flex-shrink:0;">
+        <i class="fas fa-moon"></i>
+      </button>
+      <button class="btn-manage" id="toggleAdmin">
+        <i class="fas fa-sliders-h"></i> Gestionar
+      </button>
+    </div>
   </header>
 
   <!-- ADMIN PANEL -->
@@ -1320,6 +1347,30 @@
         if (e.target === e.currentTarget) closeModal(id);
       });
     });
+
+    // ─────────────────────────────────────────────
+    // MODO OSCURO
+    // ─────────────────────────────────────────────
+    const themeBtn = document.getElementById('themeToggle');
+    let isDark = localStorage.getItem('adminTheme') === 'dark';
+
+    function applyTheme() {
+      if (isDark) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        themeBtn.querySelector('i').className = 'fas fa-sun';
+        themeBtn.title = 'Modo claro';
+      } else {
+        document.documentElement.removeAttribute('data-theme');
+        themeBtn.querySelector('i').className = 'fas fa-moon';
+        themeBtn.title = 'Modo oscuro';
+      }
+      localStorage.setItem('adminTheme', isDark ? 'dark' : 'light');
+    }
+
+    themeBtn.addEventListener('click', () => { isDark = !isDark; applyTheme(); });
+    themeBtn.addEventListener('mouseenter', () => { themeBtn.style.color = 'var(--ink)'; themeBtn.style.borderColor = 'var(--ink)'; });
+    themeBtn.addEventListener('mouseleave', () => { themeBtn.style.color = ''; themeBtn.style.borderColor = ''; });
+    applyTheme();
   </script>
 </body>
 </html>
