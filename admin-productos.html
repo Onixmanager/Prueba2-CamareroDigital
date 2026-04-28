@@ -61,7 +61,7 @@
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(244,242,238,0.7);
+      background: rgba(0,0,0,0.25);
       backdrop-filter: blur(4px);
       z-index: 9999;
       align-items: center;
@@ -94,7 +94,7 @@
       bottom: 24px; left: 50%;
       transform: translateX(-50%) translateY(80px);
       background: var(--ink);
-      color: #fff;
+      color: var(--accent-fg);
       padding: 12px 20px;
       border-radius: 30px;
       font-size: 0.85rem;
@@ -143,7 +143,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #fff;
+      color: var(--accent-fg);
       font-size: 0.9rem;
       flex-shrink: 0;
     }
@@ -167,7 +167,7 @@
       align-items: center;
       gap: 7px;
       background: var(--ink);
-      color: #fff;
+      color: var(--accent-fg);
       border: none;
       padding: 0 1.1rem;
       height: 38px;
@@ -246,14 +246,14 @@
       letter-spacing: 0.01em;
       white-space: nowrap;
     }
-    .btn-primary { background: var(--ink); color: #fff; }
+    .btn-primary { background: var(--ink); color: var(--accent-fg); }
     .btn-primary:hover { opacity: 0.85; transform: translateY(-1px); }
     .btn-secondary { background: var(--surface); color: var(--ink); border: 1.5px solid var(--border); }
     .btn-secondary:hover { background: var(--bg); }
     .btn-danger { background: rgba(217,79,61,0.1); color: var(--danger); border: 1px solid rgba(217,79,61,0.2); }
     .btn-danger:hover { background: rgba(217,79,61,0.18); }
-    .btn-edit { background: rgba(26,26,24,0.07); color: var(--ink); border: 1px solid var(--border); }
-    .btn-edit:hover { background: rgba(26,26,24,0.12); }
+    .btn-edit { background: var(--surface2); color: var(--ink); border: 1px solid var(--border); }
+    .btn-edit:hover { background: var(--bg); }
     .btn-sm { height: 32px; padding: 0 0.75rem; font-size: 0.78rem; }
     .btn-warn { background: rgba(232,146,42,0.1); color: var(--warn); border: 1px solid rgba(232,146,42,0.25); }
     .btn-warn:hover { background: rgba(232,146,42,0.18); }
@@ -370,7 +370,7 @@
       border-radius: 20px;
     }
     .td-type.menu { background: rgba(45,155,111,0.1); color: var(--success); }
-    .td-type.product { background: rgba(26,26,24,0.06); color: var(--ink-muted); }
+    .td-type.product { background: var(--surface2); color: var(--ink-muted); }
 
     .action-buttons { display: flex; gap: 6px; align-items: center; }
 
@@ -511,7 +511,7 @@
     .form-group textarea:focus {
       border-color: var(--ink);
       background: var(--surface);
-      box-shadow: 0 0 0 3px rgba(26,26,24,0.07);
+      box-shadow: 0 0 0 3px var(--border);
     }
 
     .form-group textarea {
@@ -615,7 +615,7 @@
     }
     .section-header input.section-title:focus {
       border-color: var(--ink);
-      box-shadow: 0 0 0 3px rgba(26,26,24,0.07);
+      box-shadow: 0 0 0 3px var(--border);
     }
 
     .options-container { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
