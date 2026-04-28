@@ -5,9 +5,46 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Panel de Cocina</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Mulish:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
+    /* ── LIGHT MODE (default) ── */
     :root {
+      --bg:         #F4F2EE;
+      --surface:    #FFFFFF;
+      --surface2:   #F9F8F6;
+      --surface3:   #EEECEA;
+      --border:     #E5E2DC;
+      --border2:    #D0CDC6;
+
+      --ink:        #1A1A18;
+      --ink-muted:  #7A7870;
+      --ink-dim:    #BEBAB2;
+
+      --pending:    #E8922A;
+      --pending-bg: rgba(232,146,42,0.1);
+      --pending-bd: rgba(232,146,42,0.25);
+
+      --done:       #2D9B6F;
+      --done-bg:    rgba(45,155,111,0.1);
+      --done-bd:    rgba(45,155,111,0.25);
+
+      --cancel:     #D94F3D;
+      --cancel-bg:  rgba(217,79,61,0.1);
+      --cancel-bd:  rgba(217,79,61,0.2);
+
+      --accent:     #1A1A18;
+      --accent-bg:  rgba(26,26,24,0.07);
+      --accent-fg:  #FFFFFF;
+
+      --radius:     12px;
+      --radius-sm:  7px;
+      --shadow:     0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.06);
+      --shadow-lg:  0 8px 32px rgba(0,0,0,0.12);
+      --tr:         all 0.25s cubic-bezier(0.25,0.46,0.45,0.94);
+    }
+
+    /* ── DARK MODE ── */
+    [data-theme="dark"] {
       --bg:         #0D0F12;
       --surface:    #141720;
       --surface2:   #1C2030;
@@ -33,10 +70,10 @@
 
       --accent:     #4F8EF7;
       --accent-bg:  rgba(79,142,247,0.12);
+      --accent-fg:  #FFFFFF;
 
-      --radius:     12px;
-      --radius-sm:  7px;
-      --tr:         all 0.22s cubic-bezier(0.25,0.46,0.45,0.94);
+      --shadow:     0 1px 3px rgba(0,0,0,0.3), 0 4px 16px rgba(0,0,0,0.2);
+      --shadow-lg:  0 8px 32px rgba(0,0,0,0.5);
     }
 
     *, *::before, *::after {
@@ -46,17 +83,18 @@
     }
 
     body {
-      font-family: 'Outfit', sans-serif;
+      font-family: 'Mulish', sans-serif;
       background: var(--bg);
       color: var(--ink);
       min-height: 100vh;
       overflow-x: hidden;
+      transition: background 0.3s ease, color 0.3s ease;
     }
 
     /* ── SCROLLBAR ── */
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 4px; }
+    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
 
     /* ══════════════════════════════════════
        LOGIN MODAL
@@ -64,7 +102,7 @@
     .login-modal {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.85);
+      background: rgba(0,0,0,0.5);
       display: flex;
       justify-content: center;
       align-items: center;
@@ -75,13 +113,13 @@
 
     .login-content {
       background: var(--surface);
-      border: 1px solid var(--border2);
+      border: 1px solid var(--border);
       padding: 2.5rem 2rem;
       border-radius: var(--radius);
       text-align: center;
       max-width: 320px;
       width: 100%;
-      box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+      box-shadow: var(--shadow-lg);
       animation: modalPop 0.3s cubic-bezier(0.34,1.56,0.64,1);
     }
 
@@ -92,24 +130,23 @@
 
     .login-logo {
       width: 52px; height: 52px;
-      background: var(--surface2);
-      border: 1px solid var(--border2);
+      background: var(--accent);
       border-radius: 14px;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 1.4rem;
-      color: var(--accent);
+      color: var(--accent-fg);
       margin: 0 auto 1.4rem;
     }
 
     .login-content h2 {
-      font-family: 'Outfit', sans-serif;
-      font-size: 1.1rem;
-      font-weight: 700;
+      font-family: 'Syne', sans-serif;
+      font-size: 1.15rem;
+      font-weight: 800;
       color: var(--ink);
       margin-bottom: 0.3rem;
-      letter-spacing: -0.01em;
+      letter-spacing: -0.02em;
     }
 
     .login-content p {
@@ -122,7 +159,7 @@
       width: 100%;
       padding: 11px 14px;
       margin-bottom: 14px;
-      border: 1.5px solid var(--border2);
+      border: 1.5px solid var(--border);
       border-radius: var(--radius-sm);
       font-family: 'JetBrains Mono', monospace;
       font-size: 1rem;
@@ -135,25 +172,30 @@
     }
 
     .login-content input::placeholder {
-      font-family: 'Outfit', sans-serif;
+      font-family: 'Mulish', sans-serif;
       letter-spacing: 0.02em;
       color: var(--ink-dim);
       font-size: 0.85rem;
     }
 
     .login-content input:focus {
-      border-color: var(--accent);
+      border-color: var(--ink);
+      background: var(--surface);
+      box-shadow: 0 0 0 3px rgba(26,26,24,0.07);
+    }
+
+    [data-theme="dark"] .login-content input:focus {
       box-shadow: 0 0 0 3px rgba(79,142,247,0.15);
     }
 
     .login-content button {
       width: 100%;
       padding: 11px;
-      font-family: 'Outfit', sans-serif;
+      font-family: 'Mulish', sans-serif;
       font-size: 0.9rem;
-      font-weight: 600;
-      background: var(--accent);
-      color: white;
+      font-weight: 700;
+      background: var(--ink);
+      color: var(--accent-fg);
       border: none;
       border-radius: var(--radius-sm);
       cursor: pointer;
@@ -162,9 +204,8 @@
     }
 
     .login-content button:hover {
-      background: #6BA3FF;
+      opacity: 0.85;
       transform: translateY(-1px);
-      box-shadow: 0 6px 20px rgba(79,142,247,0.3);
     }
 
     .login-error {
@@ -188,24 +229,24 @@
     .confirm-modal {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.75);
+      background: rgba(0,0,0,0.4);
       display: none;
       justify-content: center;
       align-items: center;
       z-index: 9999;
       padding: 20px;
-      backdrop-filter: blur(6px);
+      backdrop-filter: blur(4px);
     }
 
     .confirm-content {
       background: var(--surface);
-      border: 1px solid var(--border2);
+      border: 1px solid var(--border);
       padding: 2rem;
       border-radius: var(--radius);
       text-align: center;
       max-width: 380px;
       width: 100%;
-      box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+      box-shadow: var(--shadow-lg);
       animation: modalPop 0.25s cubic-bezier(0.34,1.56,0.64,1);
     }
 
@@ -223,10 +264,12 @@
     }
 
     .confirm-content h2 {
-      font-size: 1rem;
-      font-weight: 700;
+      font-family: 'Syne', sans-serif;
+      font-size: 1.05rem;
+      font-weight: 800;
       color: var(--ink);
       margin-bottom: 0.5rem;
+      letter-spacing: -0.02em;
     }
 
     .confirm-content p {
@@ -248,7 +291,7 @@
       background: var(--surface);
       border-bottom: 1px solid var(--border);
       padding: 0 1.5rem;
-      height: 60px;
+      height: 64px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -256,6 +299,7 @@
       top: 0;
       z-index: 40;
       gap: 12px;
+      box-shadow: var(--shadow);
     }
 
     .header-brand {
@@ -266,27 +310,34 @@
     }
 
     .brand-icon {
-      width: 34px; height: 34px;
-      background: var(--surface2);
-      border: 1px solid var(--border2);
+      width: 36px; height: 36px;
+      background: var(--ink);
       border-radius: 9px;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: var(--accent);
+      color: var(--accent-fg);
       font-size: 0.9rem;
+      flex-shrink: 0;
+    }
+
+    [data-theme="dark"] .brand-icon {
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      color: var(--accent);
     }
 
     .brand-name {
-      font-size: 0.95rem;
+      font-family: 'Syne', sans-serif;
+      font-size: 1.05rem;
       font-weight: 700;
       color: var(--ink);
       letter-spacing: -0.01em;
     }
 
     .brand-sub {
-      font-size: 0.68rem;
-      color: var(--ink-dim);
+      font-size: 0.7rem;
+      color: var(--ink-muted);
       font-weight: 400;
     }
 
@@ -295,12 +346,12 @@
       display: flex;
       align-items: center;
       gap: 6px;
-      background: rgba(46,204,143,0.1);
-      border: 1px solid rgba(46,204,143,0.25);
+      background: var(--done-bg);
+      border: 1px solid var(--done-bd);
       border-radius: 20px;
       padding: 4px 10px;
       font-size: 0.7rem;
-      font-weight: 600;
+      font-weight: 700;
       color: var(--done);
       letter-spacing: 0.05em;
       text-transform: uppercase;
@@ -330,23 +381,24 @@
       align-items: center;
       gap: 6px;
       padding: 0 12px;
-      height: 34px;
-      border: 1px solid var(--border2);
+      height: 36px;
+      border: 1.5px solid var(--border);
       border-radius: var(--radius-sm);
-      background: var(--surface2);
+      background: var(--surface);
       color: var(--ink-muted);
-      font-family: 'Outfit', sans-serif;
+      font-family: 'Mulish', sans-serif;
       font-size: 0.78rem;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
       transition: var(--tr);
       white-space: nowrap;
+      letter-spacing: 0.01em;
     }
 
     .ctrl-btn:hover {
       color: var(--ink);
+      background: var(--surface2);
       border-color: var(--border2);
-      background: var(--surface3);
     }
 
     .ctrl-btn.danger {
@@ -356,7 +408,15 @@
     }
 
     .ctrl-btn.danger:hover {
-      background: rgba(231,76,60,0.18);
+      background: rgba(217,79,61,0.18);
+    }
+
+    /* Dark mode toggle */
+    .ctrl-btn.theme-toggle {
+      width: 36px;
+      padding: 0;
+      justify-content: center;
+      border-radius: 50%;
     }
 
     .ctrl-btn i { font-size: 0.82rem; }
@@ -384,13 +444,13 @@
       gap: 7px;
       padding: 0 14px;
       height: 32px;
-      border: 1px solid var(--border);
+      border: 1.5px solid var(--border);
       border-radius: 20px;
       background: transparent;
       color: var(--ink-muted);
-      font-family: 'Outfit', sans-serif;
+      font-family: 'Mulish', sans-serif;
       font-size: 0.8rem;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
       transition: var(--tr);
       white-space: nowrap;
@@ -404,7 +464,7 @@
     }
 
     .filter-btn.active {
-      background: var(--surface3);
+      background: var(--surface2);
       border-color: var(--border2);
       color: var(--ink);
     }
@@ -415,11 +475,13 @@
 
     .filter-count {
       background: var(--surface3);
+      border: 1px solid var(--border);
       border-radius: 20px;
       padding: 1px 7px;
       font-size: 0.7rem;
       min-width: 20px;
       text-align: center;
+      font-family: 'JetBrains Mono', monospace;
     }
 
     .filter-btn.active .filter-count { background: rgba(255,255,255,0.15); }
@@ -432,8 +494,9 @@
     .filter-indicator {
       text-align: center;
       margin-bottom: 1rem;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       color: var(--ink-muted);
+      font-weight: 500;
       opacity: 0;
       transform: translateY(-10px);
       transition: var(--tr);
@@ -471,7 +534,8 @@
       padding: 8px 14px;
       font-size: 0.8rem;
       color: var(--ink-muted);
-      font-weight: 500;
+      font-weight: 600;
+      box-shadow: var(--shadow);
     }
 
     .stat-chip strong {
@@ -508,6 +572,7 @@
       position: relative;
       transition: var(--tr);
       animation: cardIn 0.35s ease-out both;
+      box-shadow: var(--shadow);
     }
 
     @keyframes cardIn {
@@ -517,7 +582,7 @@
 
     .order-card:hover {
       border-color: var(--border2);
-      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+      box-shadow: var(--shadow-lg);
       transform: translateY(-2px);
     }
 
@@ -542,18 +607,24 @@
 
     .table-icon {
       width: 32px; height: 32px;
-      background: var(--surface2);
-      border: 1px solid var(--border2);
+      background: var(--ink);
       border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: var(--accent);
+      color: var(--accent-fg);
       font-size: 0.8rem;
       flex-shrink: 0;
     }
 
+    [data-theme="dark"] .table-icon {
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      color: var(--accent);
+    }
+
     .table-name {
+      font-family: 'Syne', sans-serif;
       font-size: 1rem;
       font-weight: 700;
       color: var(--ink);
@@ -693,9 +764,9 @@
       border: none;
       background: transparent;
       cursor: pointer;
-      font-family: 'Outfit', sans-serif;
+      font-family: 'Mulish', sans-serif;
       font-size: 0.78rem;
-      font-weight: 600;
+      font-weight: 700;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -767,9 +838,9 @@
       border-radius: var(--radius-sm);
       padding: 0 16px;
       height: 38px;
-      font-family: 'Outfit', sans-serif;
+      font-family: 'Mulish', sans-serif;
       font-size: 0.85rem;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
       transition: var(--tr);
       flex: 1;
@@ -778,7 +849,7 @@
     .btn-ghost {
       background: var(--surface2);
       color: var(--ink-muted);
-      border: 1px solid var(--border2);
+      border: 1.5px solid var(--border);
     }
     .btn-ghost:hover { color: var(--ink); background: var(--surface3); }
 
@@ -786,7 +857,7 @@
       background: var(--cancel);
       color: white;
     }
-    .btn-danger-solid:hover { background: #C0392B; transform: translateY(-1px); }
+    .btn-danger-solid:hover { opacity: 0.85; transform: translateY(-1px); }
 
     /* ══════════════════════════════════════
        RESPONSIVE
@@ -802,17 +873,17 @@
         padding: 10px 14px;
         background: var(--surface);
         color: var(--ink);
-        border: 1px solid var(--border2);
+        border: 1.5px solid var(--border);
         border-radius: var(--radius-sm);
-        font-family: 'Outfit', sans-serif;
+        font-family: 'Mulish', sans-serif;
         font-size: 0.9rem;
-        font-weight: 500;
+        font-weight: 600;
         margin-bottom: 1.2rem;
         cursor: pointer;
         outline: none;
         -webkit-appearance: none;
         appearance: none;
-        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%238892A4'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%237A7870'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
         background-repeat: no-repeat;
         background-position: right 12px center;
         background-size: 22px;
@@ -886,6 +957,9 @@
     </div>
 
     <div class="header-controls">
+      <button id="themeToggle" class="ctrl-btn theme-toggle" title="Cambiar tema">
+        <i class="fas fa-moon"></i>
+      </button>
       <button id="soundToggle" class="ctrl-btn">
         <i class="fas fa-bell"></i> <span>Sonido: ON</span>
       </button>
@@ -1366,7 +1440,32 @@
     updateFilters('all');
     updateStats();
 
-    // Actualizar el reloj de "última actualización" cada minuto
+    // ── Tema oscuro / claro ──
+    const themeBtn  = document.getElementById('themeToggle');
+    const htmlEl    = document.documentElement;
+    let isDark = localStorage.getItem('theme') === 'dark';
+
+    function applyTheme() {
+      if (isDark) {
+        htmlEl.setAttribute('data-theme', 'dark');
+        themeBtn.querySelector('i').className = 'fas fa-sun';
+        themeBtn.title = 'Modo claro';
+      } else {
+        htmlEl.removeAttribute('data-theme');
+        themeBtn.querySelector('i').className = 'fas fa-moon';
+        themeBtn.title = 'Modo oscuro';
+      }
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    }
+
+    themeBtn.addEventListener('click', () => {
+      isDark = !isDark;
+      applyTheme();
+    });
+
+    applyTheme();
+
+    // ── Actualizar el reloj de "última actualización" cada minuto ──
     setInterval(updateStats, 60000);
   </script>
 </body>
