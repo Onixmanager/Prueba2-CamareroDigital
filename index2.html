@@ -242,6 +242,8 @@
       position: relative;
       animation: fadeUp 0.45s ease-out both;
       will-change: transform;
+      display: flex;
+      flex-direction: column;
     }
 
     .product-card:nth-child(1) { animation-delay: 0.04s; }
@@ -290,6 +292,9 @@
 
     .card-body {
       padding: 1.1rem 1.1rem 1.3rem;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
     }
 
     .card-body h3 {
@@ -310,12 +315,14 @@
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
+      flex: 1;
     }
 
     .card-footer {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      margin-top: auto;
     }
 
     .price {
